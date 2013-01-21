@@ -21,6 +21,8 @@ class Button extends Widget {
 
 		super();
 
+		height=25;
+
 		setText(text);
 
 		onClick=new Signal();
