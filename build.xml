@@ -1,0 +1,15 @@
+<project name="uifive">
+	<target name="basetest">
+		<exec executable="haxe" failonerror="true">
+			<arg value="-debug"/>
+			<arg value="-cp"/>
+			<arg value="src"/>
+			<arg value="-cp"/>
+			<arg value="test"/>
+			<arg value="-js"/>
+			<arg value="html/basetest.js"/>
+			<arg value="-main"/>
+			<arg value="test.base.BaseTest"/>
+		</exec>
+	</target>
+</project>
