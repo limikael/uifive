@@ -212,6 +212,13 @@ class Widget implements IWidget {
 	}
 
 	/**
+	 * Add css class.
+	 */
+	public function addClass(className:String):Void {
+		_node.className=className;
+	}
+
+	/**
 	 * Update style.
 	 */
 	private function updateStyle():Void {
