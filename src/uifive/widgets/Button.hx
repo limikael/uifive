@@ -8,6 +8,7 @@ import uifive.signals.Signal;
  */
 class Button extends Widget {
 
+	public var enabled(getEnabled,setEnabled):Bool;
 	public var onClick(default,null):Signal;
 
 	private var _text:String;
@@ -42,5 +43,24 @@ class Button extends Widget {
 			_text="";
 
 		_node.innerHTML=_text;
+	}
+
+	/**
+	 * Set enabled.
+	 */
+	public function setEnabled(value:Bool):Bool {
+		var d:Dynamic=cast _node;
+		d.disabled=!value;
+
+		return getEnabled();
+	}
+
+	/**
+	 * Get enabled.
+	 */
+	public function getEnabled():Bool {
+		var d:Dynamic=cast _node;
+
+		return !d.disabled;
 	}
 }
