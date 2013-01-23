@@ -12,8 +12,8 @@ class Widget implements IWidget {
 	public var height(getHeight,setHeight):Int;
 	public var left(getLeft,setLeft):Int;
 	public var top(getTop,setTop):Int;
-	public var right(null,setRight):Int;
-	public var bottom(null,setBottom):Int;
+	public var right(getRight,setRight):Int;
+	public var bottom(getBottom,setBottom):Int;
 	public var container(null,setContainer):WidgetContainer;
 	public var node(getNode,null):HtmlDom;
 
@@ -140,64 +140,42 @@ class Widget implements IWidget {
 	 * Get actual width.
 	 */
 	private function getWidth():Int {
-		if (_container==null)
-			return 0;
-
-		if (_left!=null && _right!=null)
-			return _container.width-_left-_right;
-
-		if (_width!=null)
-			return _width;
-
-		return _container.width-_left-_right;
+		return _width;
 	}
 
 	/**
 	 * Get actual height.
 	 */
 	private function getHeight():Int {
-		if (_container==null)
-			return 0;
-
-		if (_top!=null && _bottom!=null)
-			return _container.height-_top-_bottom;
-
-		if (_height!=null)
-			return _height;
-
-		return _container.height-_top-_bottom;
+		return _height;
 	}
 
 	/**
 	 * Get actual left.
 	 */
 	private function getLeft():Int {
-		if (_container==null)
-			return 0;
-
-		if (_left!=null)
-			return _left;
-
-		if (_right!=null && _width!=null)
-			return _container.width-_right-_width;
-
-		return 0;
+		return _left;
 	}
 
 	/**
 	 * Get actual top.
 	 */
 	private function getTop():Int {
-		if (_container==null)
-			return 0;
+		return _top;
+	}
 
-		if (_top!=null)
-			return _top;
+	/**
+	 * Get right.
+	 */
+	private function getRight():Int {
+		return _right;
+	}
 
-		if (_bottom!=null && _height!=null)
-			return _container.height-_bottom-_height;
-
-		return 0;
+	/**
+	 * Get bottom.
+	 */
+	private function getBottom():Int {
+		return _bottom;
 	}
 
 	/**
