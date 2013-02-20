@@ -4,11 +4,15 @@ import uifive.base.WidgetContainer;
 
 class VerticalLayout extends Layout{
 
+	private var _resizeParent:Bool;
+
 	/**
 	 * Construct.
 	 */
-	public function new() {
+	public function new(resizeParent:Bool=false) {
 		super();
+
+		_resizeParent=resizeParent;
 	}
 
 	/**
@@ -21,5 +25,8 @@ class VerticalLayout extends Layout{
 			w.top=y;
 			y+=w.height;
 		}
+
+		if (_resizeParent)
+			_target.height=y;
 	}
 }

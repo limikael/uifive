@@ -26,4 +26,18 @@
 			<arg value="test.base.SignalTest"/>
 		</exec>
 	</target>
+
+	<target name="menutest">
+		<exec executable="haxe" failonerror="true">
+			<arg value="-debug"/>
+			<arg value="-cp"/>
+			<arg value="src"/>
+			<arg value="-cp"/>
+			<arg value="test"/>
+			<arg value="-js"/>
+			<arg value="html/menutest.js"/>
+			<arg value="-main"/>
+			<arg value="test.menu.MenuTest"/>
+		</exec>
+	</target>
 </project>
