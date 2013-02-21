@@ -28,7 +28,7 @@ class MenuItem extends WidgetContainer {
 		height=20;
 		width=200;
 
-		_acceleratorField=new Label(accelerator);
+		_acceleratorField=new Label("Ctrl+"+accelerator);
 		_acceleratorField.align=Label.RIGHT;
 		_acceleratorField.left=10;
 		_acceleratorField.right=10;

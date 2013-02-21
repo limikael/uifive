@@ -82,6 +82,80 @@ IntIter.prototype = {
 	}
 	,__class__: IntIter
 }
+var Reflect = function() { }
+Reflect.__name__ = true;
+Reflect.hasField = function(o,field) {
+	return Object.prototype.hasOwnProperty.call(o,field);
+}
+Reflect.field = function(o,field) {
+	var v = null;
+	try {
+		v = o[field];
+	} catch( e ) {
+	}
+	return v;
+}
+Reflect.setField = function(o,field,value) {
+	o[field] = value;
+}
+Reflect.getProperty = function(o,field) {
+	var tmp;
+	return o == null?null:o.__properties__ && (tmp = o.__properties__["get_" + field])?o[tmp]():o[field];
+}
+Reflect.setProperty = function(o,field,value) {
+	var tmp;
+	if(o.__properties__ && (tmp = o.__properties__["set_" + field])) o[tmp](value); else o[field] = value;
+}
+Reflect.callMethod = function(o,func,args) {
+	return func.apply(o,args);
+}
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(hasOwnProperty.call(o,f)) a.push(f);
+		}
+	}
+	return a;
+}
+Reflect.isFunction = function(f) {
+	return typeof(f) == "function" && !(f.__name__ || f.__ename__);
+}
+Reflect.compare = function(a,b) {
+	return a == b?0:a > b?1:-1;
+}
+Reflect.compareMethods = function(f1,f2) {
+	if(f1 == f2) return true;
+	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) return false;
+	return f1.scope == f2.scope && f1.method == f2.method && f1.method != null;
+}
+Reflect.isObject = function(v) {
+	if(v == null) return false;
+	var t = typeof(v);
+	return t == "string" || t == "object" && !v.__enum__ || t == "function" && (v.__name__ || v.__ename__);
+}
+Reflect.deleteField = function(o,f) {
+	if(!Reflect.hasField(o,f)) return false;
+	delete(o[f]);
+	return true;
+}
+Reflect.copy = function(o) {
+	var o2 = { };
+	var _g = 0, _g1 = Reflect.fields(o);
+	while(_g < _g1.length) {
+		var f = _g1[_g];
+		++_g;
+		o2[f] = Reflect.field(o,f);
+	}
+	return o2;
+}
+Reflect.makeVarArgs = function(f) {
+	return function() {
+		var a = Array.prototype.slice.call(arguments);
+		return f(a);
+	};
+}
 var Std = function() { }
 Std.__name__ = true;
 Std["is"] = function(v,t) {
@@ -261,6 +335,7 @@ uifive.base.IWidget = function() { }
 uifive.base.IWidget.__name__ = true;
 uifive.base.IWidget.prototype = {
 	__class__: uifive.base.IWidget
+	,__properties__: {get_node:"getNode",set_container:"setContainer",set_width:"setWidth",get_width:"getWidth",set_height:"setHeight",get_height:"getHeight",set_left:"setLeft",get_left:"getLeft",set_top:"setTop",get_top:"getTop",set_right:"setRight",set_bottom:"setBottom"}
 }
 uifive.base.Widget = function() {
 	if(this.getNode() == null) this._node = js.Lib.document.createElement("div");
@@ -288,6 +363,9 @@ uifive.base.Widget.prototype = {
 	}
 	,addClass: function(className) {
 		this._node.className = className;
+	}
+	,getContainer: function() {
+		return this._container;
 	}
 	,setContainer: function(w) {
 		this._container = w;
@@ -352,6 +430,7 @@ uifive.base.Widget.prototype = {
 		return this._node;
 	}
 	,__class__: uifive.base.Widget
+	,__properties__: {set_width:"setWidth",get_width:"getWidth",set_height:"setHeight",get_height:"getHeight",set_left:"setLeft",get_left:"getLeft",set_top:"setTop",get_top:"getTop",set_right:"setRight",get_right:"getRight",set_bottom:"setBottom",get_bottom:"getBottom",set_container:"setContainer",get_container:"getContainer",get_node:"getNode"}
 }
 uifive.base.WidgetContainer = function() {
 	uifive.base.Widget.call(this);
@@ -390,14 +469,23 @@ uifive.base.WidgetContainer.prototype = $extend(uifive.base.Widget.prototype,{
 		if(this._layout != null) this._layout.updateLayout();
 	}
 	,__class__: uifive.base.WidgetContainer
+	,__properties__: $extend(uifive.base.Widget.prototype.__properties__,{set_layout:"setLayout",get_layout:"getLayout",get_widgets:"getWidgets"})
 });
 uifive.base.RootContainer = function() {
+	var _g = this;
 	uifive.base.WidgetContainer.call(this);
 	this.setLeft(0);
 	this.setRight(0);
 	this.setTop(0);
 	this.setBottom(0);
 	this.updateStyle();
+	this.onMouseDown = new uifive.signals.EventSignal();
+	this._node.onmousedown = function(e) {
+		var info = e;
+		var x = info.pageX;
+		var y = info.pageY;
+		_g.onMouseDown.dispatch(new uifive.signals.MouseEvent(x,y));
+	};
 };
 uifive.base.RootContainer.__name__ = true;
 uifive.base.RootContainer.__super__ = uifive.base.WidgetContainer;
@@ -412,12 +500,18 @@ var test = test || {}
 if(!test.menu) test.menu = {}
 test.menu.MenuTest = function() {
 	uifive.base.RootContainer.call(this);
+	var bar = new uifive.menu.MenuBar();
 	var m = new uifive.menu.Menu();
-	m.setLeft(20);
-	m.setTop(20);
-	this.addWidget(m);
-	m.addItem(new uifive.menu.MenuItem("hello","Hello","H"));
-	m.addItem(new uifive.menu.MenuItem("again","Again","A"));
+	m.addItem(new uifive.menu.MenuItem("open","Open","H"));
+	m.addItem(new uifive.menu.MenuItem("close","Close","A"));
+	bar.addMenu("Project",m);
+	var m1 = new uifive.menu.Menu();
+	m1.addItem(new uifive.menu.MenuItem("cut","Cut","H"));
+	m1.addItem(new uifive.menu.MenuItem("paste","Paste","A"));
+	bar.addMenu("Edit",m1);
+	bar.setLeft(10);
+	bar.setTop(10);
+	this.addWidget(bar);
 };
 test.menu.MenuTest.__name__ = true;
 test.menu.MenuTest.main = function() {
@@ -441,7 +535,36 @@ uifive.layout.Layout.prototype = {
 		return this._target;
 	}
 	,__class__: uifive.layout.Layout
+	,__properties__: {set_target:"setTarget"}
 }
+uifive.layout.HorizontalLayout = function(resizeParent) {
+	if(resizeParent == null) resizeParent = false;
+	uifive.layout.Layout.call(this);
+	this._resizeParent = resizeParent;
+};
+uifive.layout.HorizontalLayout.__name__ = true;
+uifive.layout.HorizontalLayout.__super__ = uifive.layout.Layout;
+uifive.layout.HorizontalLayout.prototype = $extend(uifive.layout.Layout.prototype,{
+	updateLayout: function() {
+		var x = 0;
+		var _g = 0, _g1 = this._target.getWidgets();
+		while(_g < _g1.length) {
+			var w = _g1[_g];
+			++_g;
+			if(x != 0) x += this._gap;
+			w.setLeft(x);
+			x += w.getWidth();
+		}
+		if(this._resizeParent) this._target.setWidth(x);
+	}
+	,setGap: function(value) {
+		this._gap = value;
+		if(this._target != null) this.updateLayout();
+		return this._gap;
+	}
+	,__class__: uifive.layout.HorizontalLayout
+	,__properties__: $extend(uifive.layout.Layout.prototype.__properties__,{set_gap:"setGap"})
+});
 uifive.layout.VerticalLayout = function(resizeParent) {
 	if(resizeParent == null) resizeParent = false;
 	uifive.layout.Layout.call(this);
@@ -482,11 +605,57 @@ uifive.menu.Menu.prototype = $extend(uifive.base.WidgetContainer.prototype,{
 	}
 	,__class__: uifive.menu.Menu
 });
+uifive.menu.MenuBar = function() {
+	uifive.base.WidgetContainer.call(this);
+	var h = new uifive.layout.HorizontalLayout(true);
+	h.setGap(10);
+	this.setLayout(h);
+	this.setHeight(25);
+	this._buttons = new Array();
+	this._menus = new Array();
+};
+uifive.menu.MenuBar.__name__ = true;
+uifive.menu.MenuBar.__super__ = uifive.base.WidgetContainer;
+uifive.menu.MenuBar.prototype = $extend(uifive.base.WidgetContainer.prototype,{
+	onRootMouseDown: function(e) {
+		if(this._visibleMenu != null) {
+			var p = uifive.utils.WidgetUtil.getGlobalPosition(this._visibleMenu);
+			if(e.x >= p.x && e.y >= p.y && e.x <= p.x + this._visibleMenu.getWidth() && e.y <= p.y + this._visibleMenu.getHeight()) return;
+			this.hideMenu();
+		}
+	}
+	,hideMenu: function() {
+		var root = uifive.utils.WidgetUtil.getRootContainer(this);
+		root.onMouseDown.removeListener($bind(this,this.onRootMouseDown));
+		if(this._visibleMenu != null) this._visibleMenu.getContainer().removeWidget(this._visibleMenu);
+	}
+	,onButtonClick: function(index) {
+		this.hideMenu();
+		console.log("button click: " + index + " menu: " + Std.string(this._menus[index]));
+		var root = uifive.utils.WidgetUtil.getRootContainer(this);
+		root.onMouseDown.addListener($bind(this,this.onRootMouseDown));
+		var p = uifive.utils.WidgetUtil.getGlobalPosition(this._buttons[index]);
+		var m = this._menus[index];
+		m.setLeft(p.x);
+		m.setTop(p.y + 30);
+		root.addWidget(m);
+		this._visibleMenu = m;
+	}
+	,addMenu: function(label,menu) {
+		var b = new uifive.widgets.Button(label);
+		b.onClick.addListenerWithParameter($bind(this,this.onButtonClick),this._buttons.length);
+		b.setWidth(label.length * 8 + 10);
+		this._buttons.push(b);
+		this._menus.push(menu);
+		this.addWidget(b);
+	}
+	,__class__: uifive.menu.MenuBar
+});
 uifive.menu.MenuItem = function(id,label,accelerator) {
 	uifive.base.WidgetContainer.call(this);
 	this.setHeight(20);
 	this.setWidth(200);
-	this._acceleratorField = new uifive.widgets.Label(accelerator);
+	this._acceleratorField = new uifive.widgets.Label("Ctrl+" + accelerator);
 	this._acceleratorField.setAlign("right");
 	this._acceleratorField.setLeft(10);
 	this._acceleratorField.setRight(10);
@@ -518,7 +687,122 @@ uifive.menu.MenuItem.prototype = $extend(uifive.base.WidgetContainer.prototype,{
 		this._node.style.backgroundColor = "#e0e0ff";
 	}
 	,__class__: uifive.menu.MenuItem
+	,__properties__: $extend(uifive.base.WidgetContainer.prototype.__properties__,{get_id:"getId"})
 });
+if(!uifive.signals) uifive.signals = {}
+uifive.signals.EventSignal = function() {
+	this._listeners = new Array();
+	this._connections = new Array();
+};
+uifive.signals.EventSignal.__name__ = true;
+uifive.signals.EventSignal.prototype = {
+	dispatch: function(event) {
+		var _g = 0, _g1 = this._listeners;
+		while(_g < _g1.length) {
+			var listener = _g1[_g];
+			++_g;
+			listener(event);
+		}
+		var _g = 0, _g1 = this._connections;
+		while(_g < _g1.length) {
+			var connection = _g1[_g];
+			++_g;
+			connection.dispatch(event);
+		}
+	}
+	,addConnection: function(signal) {
+		this._connections.push(signal);
+	}
+	,removeListener: function(listener) {
+		var _g1 = 0, _g = this._listeners.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(Reflect.compareMethods(this._listeners[i],listener)) {
+				this._listeners.splice(i,1);
+				return;
+			}
+		}
+	}
+	,addListener: function(listener) {
+		this.removeListener(listener);
+		this._listeners.push(listener);
+	}
+	,__class__: uifive.signals.EventSignal
+}
+uifive.signals.MouseEvent = function(pX,pY) {
+	this.x = pX;
+	this.y = pY;
+};
+uifive.signals.MouseEvent.__name__ = true;
+uifive.signals.MouseEvent.prototype = {
+	__class__: uifive.signals.MouseEvent
+}
+uifive.signals.ParameterListener = function(l,p) {
+	this.listener = l;
+	this.parameter = p;
+};
+uifive.signals.ParameterListener.__name__ = true;
+uifive.signals.ParameterListener.prototype = {
+	__class__: uifive.signals.ParameterListener
+}
+uifive.signals.Signal = function() {
+	this._listeners = new Array();
+	this._parameterListeners = new Array();
+	this._connections = new Array();
+};
+uifive.signals.Signal.__name__ = true;
+uifive.signals.Signal.prototype = {
+	dispatch: function() {
+		var _g = 0, _g1 = this._listeners;
+		while(_g < _g1.length) {
+			var listener = _g1[_g];
+			++_g;
+			listener();
+		}
+		var _g = 0, _g1 = this._connections;
+		while(_g < _g1.length) {
+			var connection = _g1[_g];
+			++_g;
+			connection.dispatch();
+		}
+		var _g = 0, _g1 = this._parameterListeners;
+		while(_g < _g1.length) {
+			var parameterListener = _g1[_g];
+			++_g;
+			parameterListener.listener(parameterListener.parameter);
+		}
+	}
+	,addConnection: function(signal) {
+		this._connections.push(signal);
+	}
+	,removeListener: function(listener) {
+		var _g1 = 0, _g = this._listeners.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(Reflect.compareMethods(this._listeners[i],listener)) {
+				this._listeners.splice(i,1);
+				return;
+			}
+		}
+		var _g1 = 0, _g = this._parameterListeners.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(Reflect.compareMethods(this._parameterListeners[i].listener,listener)) {
+				this._parameterListeners.splice(i,1);
+				return;
+			}
+		}
+	}
+	,addListenerWithParameter: function(listener,parameter) {
+		this.removeListener(listener);
+		this._parameterListeners.push(new uifive.signals.ParameterListener(listener,parameter));
+	}
+	,addListener: function(listener) {
+		this.removeListener(listener);
+		this._listeners.push(listener);
+	}
+	,__class__: uifive.signals.Signal
+}
 if(!uifive.utils) uifive.utils = {}
 uifive.utils.ArrayTools = function() { }
 uifive.utils.ArrayTools.__name__ = true;
@@ -544,7 +828,69 @@ uifive.utils.ArrayTools.indexOf = function(arr,val) {
 	}
 	return -1;
 }
+uifive.utils.Point = function(pX,pY) {
+	this.x = pX;
+	this.y = pY;
+};
+uifive.utils.Point.__name__ = true;
+uifive.utils.Point.prototype = {
+	add: function(p) {
+		return new uifive.utils.Point(this.x + p.x,this.y + p.y);
+	}
+	,__class__: uifive.utils.Point
+}
+uifive.utils.WidgetUtil = function() { }
+uifive.utils.WidgetUtil.__name__ = true;
+uifive.utils.WidgetUtil.getRootContainer = function(w) {
+	if(js.Boot.__instanceof(w,uifive.base.RootContainer)) return w;
+	var r = w.getContainer();
+	while(!js.Boot.__instanceof(r,uifive.base.RootContainer)) {
+		if(r == null) return null;
+		r = r.getContainer();
+	}
+	return r;
+}
+uifive.utils.WidgetUtil.getGlobalPosition = function(w) {
+	var p = new uifive.utils.Point(w.getLeft(),w.getTop());
+	while(!js.Boot.__instanceof(w,uifive.base.RootContainer)) {
+		if(w == null) return null;
+		w = w.getContainer();
+		p = p.add(new uifive.utils.Point(w.getLeft(),w.getTop()));
+	}
+	return p;
+}
 if(!uifive.widgets) uifive.widgets = {}
+uifive.widgets.Button = function(text) {
+	var _g = this;
+	this._node = js.Lib.document.createElement("button");
+	uifive.base.Widget.call(this);
+	this.setHeight(25);
+	this.setText(text);
+	this.onClick = new uifive.signals.Signal();
+	this._node.onclick = function(e) {
+		_g.onClick.dispatch();
+	};
+};
+uifive.widgets.Button.__name__ = true;
+uifive.widgets.Button.__super__ = uifive.base.Widget;
+uifive.widgets.Button.prototype = $extend(uifive.base.Widget.prototype,{
+	getEnabled: function() {
+		var d = this._node;
+		return !d.disabled;
+	}
+	,setEnabled: function(value) {
+		var d = this._node;
+		d.disabled = !value;
+		return this.getEnabled();
+	}
+	,setText: function(text) {
+		this._text = text;
+		if(this._text == null) this._text = "";
+		this._node.innerHTML = this._text;
+	}
+	,__class__: uifive.widgets.Button
+	,__properties__: $extend(uifive.base.Widget.prototype.__properties__,{set_enabled:"setEnabled",get_enabled:"getEnabled"})
+});
 uifive.widgets.Label = function(text) {
 	uifive.base.Widget.call(this);
 	this.setText(text);
@@ -594,6 +940,7 @@ uifive.widgets.Label.prototype = $extend(uifive.base.Widget.prototype,{
 		return this._text;
 	}
 	,__class__: uifive.widgets.Label
+	,__properties__: $extend(uifive.base.Widget.prototype.__properties__,{set_text:"setText",get_text:"getText",set_align:"setAlign",set_selectable:"setSelectable"})
 });
 var $_;
 function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };

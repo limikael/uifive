@@ -14,7 +14,7 @@ class Widget implements IWidget {
 	public var top(getTop,setTop):Int;
 	public var right(getRight,setRight):Int;
 	public var bottom(getBottom,setBottom):Int;
-	public var container(null,setContainer):WidgetContainer;
+	public var container(getContainer,setContainer):WidgetContainer;
 	public var node(getNode,null):HtmlDom;
 
 	private var _node:HtmlDom;
@@ -186,6 +186,13 @@ class Widget implements IWidget {
 
 		updateStyle();
 
+		return _container;
+	}
+
+	/**
+	 * Get container.
+	 */
+	private function getContainer():WidgetContainer {
 		return _container;
 	}
 

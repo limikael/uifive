@@ -3,6 +3,7 @@ package test.menu;
 import uifive.base.RootContainer;
 import uifive.menu.Menu;
 import uifive.menu.MenuItem;
+import uifive.menu.MenuBar;
 
 /**
  * Menu test.
@@ -15,13 +16,21 @@ class MenuTest extends RootContainer {
 	public function new() {
 		super();
 
-		var m:Menu=new Menu();
-		m.left=20;
-		m.top=20;
-		addWidget(m);
+		var bar:MenuBar=new MenuBar();
 
-		m.addItem(new MenuItem("hello","Hello","H"));
-		m.addItem(new MenuItem("again","Again","A"));
+		var m:Menu=new Menu();
+		m.addItem(new MenuItem("open","Open","H"));
+		m.addItem(new MenuItem("close","Close","A"));
+		bar.addMenu("Project",m);
+
+		var m:Menu=new Menu();
+		m.addItem(new MenuItem("cut","Cut","H"));
+		m.addItem(new MenuItem("paste","Paste","A"));
+		bar.addMenu("Edit",m);
+
+		bar.left=10;
+		bar.top=10;
+		addWidget(bar);
 	}
 
 	/**

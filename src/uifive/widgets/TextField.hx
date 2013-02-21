@@ -45,6 +45,9 @@ class TextField extends Widget {
 		if (text==null)
 			text="";
 
+		if (_formNode.value==text)
+			return text;
+
 		_formNode.value=text;
 
 		return text;
