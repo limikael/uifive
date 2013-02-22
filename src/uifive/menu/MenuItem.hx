@@ -37,11 +37,15 @@ class MenuItem extends WidgetContainer {
 		height=20;
 		width=200;
 
-		if (accelerator.toUpperCase()==accelerator)
-			_acceleratorField=new Label("Ctrl+Shift+"+accelerator.toUpperCase());
+		_acceleratorField=new Label();
 
-		else
-			_acceleratorField=new Label("Ctrl+"+accelerator.toUpperCase());
+		if (accelerator!=null && accelerator!="") {
+			if (accelerator.toUpperCase()==accelerator)
+				_acceleratorField=new Label("Ctrl+Shift+"+accelerator.toUpperCase());
+
+			else
+				_acceleratorField=new Label("Ctrl+"+accelerator.toUpperCase());
+		}
 
 		_acceleratorField.align=Label.RIGHT;
 		_acceleratorField.left=10;

@@ -43,6 +43,14 @@ class MenuBar extends WidgetContainer {
 	}
 
 	/**
+	 * Add button class.
+	 */
+	public function addButtonClass(cls:String):Void {
+		for (b in _buttons)
+			b.addClass(cls);
+	}
+
+	/**
 	 * Add a menu item.
 	 */
 	public function addMenu(label:String, menu:Menu):Void {
