@@ -8,11 +8,17 @@ import uifive.widgets.Button;
 import uifive.utils.WidgetUtil;
 import uifive.utils.Point;
 import uifive.signals.MouseEvent;
+import uifive.signals.EventSignal;
+
+import js.Lib;
+import js.Dom.Event;
 
 /**
  * Menu.
  */
 class MenuBar extends WidgetContainer {
+
+	public var onAction:EventSignal<String>;
 
 	private var _buttons:Array<Button>;
 	private var _menus:Array<Menu>;
@@ -23,6 +29,8 @@ class MenuBar extends WidgetContainer {
 	 */
 	public function new() {
 		super();
+
+		onAction=new EventSignal<String>();
 
 		var h:HorizontalLayout=new HorizontalLayout(true);
 		h.gap=10;
@@ -45,7 +53,29 @@ class MenuBar extends WidgetContainer {
 		_buttons.push(b);
 		_menus.push(menu);
 
+		menu.onAction.addListener(onMenuAction);
+
 		addWidget(b);
+	}
+
+	/**
+	 * Create menu.
+	 */
+	public function createMenu(label:String):Menu {
+		var m:Menu=new Menu();
+
+		addMenu(label,m);
+
+		return m;
+	}
+
+	/**
+	 * Menu click.
+	 */
+	private function onMenuAction(id:String):Void {
+		hideMenu();
+
+		onAction.dispatch(id);
 	}
 
 	/**
@@ -54,7 +84,7 @@ class MenuBar extends WidgetContainer {
 	private function onButtonClick(index:Int):Void {
 		hideMenu();
 
-		trace("button click: "+index+" menu: "+_menus[index]);
+		//trace("button click: "+index+" menu: "+_menus[index]);
 
 		var root:RootContainer=WidgetUtil.getRootContainer(this);
 		root.onMouseDown.addListener(onRootMouseDown);
@@ -91,6 +121,60 @@ class MenuBar extends WidgetContainer {
 
 			hideMenu();
 		}
-//		trace("root mouse down");
+	}
+
+	/**
+	 * Set container.
+	 */
+	override private function setContainer(w:WidgetContainer):WidgetContainer {
+		Lib.document.onkeydown=onWindowKeyDown;
+
+		return super.setContainer(w);
+	}
+
+	/**
+	 * Get menu item by accelerator.
+	 */
+	public function getMenuItemByAccelerator(accelerator:String):MenuItem {
+		for (menu in _menus) {
+			var item:MenuItem=menu.getMenuItemByAccelerator(accelerator);
+			if (item!=null)
+				return item;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get menu item by id.
+	 */
+	public function getMenuItemById(id:String):MenuItem {
+		for (menu in _menus) {
+			var item:MenuItem=menu.getMenuItemById(id);
+			if (item!=null)
+				return item;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Window key up.
+	 */
+	private function onWindowKeyDown(e:Event):Void {
+		if (e.ctrlKey) {
+			var s:String=String.fromCharCode(e.keyCode);
+
+			if (e.shiftKey)
+				s=s.toUpperCase();
+
+			else
+				s=s.toLowerCase();
+
+			var item:MenuItem=getMenuItemByAccelerator(s);
+
+			if (item!=null)
+				onAction.dispatch(item.id);
+		}
 	}
 }

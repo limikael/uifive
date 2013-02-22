@@ -16,21 +16,28 @@ class MenuTest extends RootContainer {
 	public function new() {
 		super();
 
+		var m:Menu;
 		var bar:MenuBar=new MenuBar();
+		bar.onAction.addListener(onMenuAction);
 
-		var m:Menu=new Menu();
-		m.addItem(new MenuItem("open","Open","H"));
-		m.addItem(new MenuItem("close","Close","A"));
-		bar.addMenu("Project",m);
+		m=bar.createMenu("File");
+		m.createItem("open","Open","h");
+		m.createItem("close","Close","A");
 
-		var m:Menu=new Menu();
-		m.addItem(new MenuItem("cut","Cut","H"));
-		m.addItem(new MenuItem("paste","Paste","A"));
-		bar.addMenu("Edit",m);
+		m=bar.createMenu("Edit");
+		m.createItem("cut","Cut","x");
+		m.createItem("paste","Paste","y");
 
 		bar.left=10;
 		bar.top=10;
 		addWidget(bar);
+	}
+
+	/**
+	 * On menu action.
+	 */
+	private function onMenuAction(id:String):Void {
+		trace("menu action: "+id);
 	}
 
 	/**

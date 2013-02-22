@@ -3,6 +3,8 @@ package uifive.menu;
 import uifive.base.WidgetContainer;
 import uifive.base.Widget;
 import uifive.widgets.Label;
+import uifive.signals.Signal;
+
 import js.Dom.Event;
 
 /**
@@ -10,7 +12,10 @@ import js.Dom.Event;
  */
 class MenuItem extends WidgetContainer {
 
+	public var onClick(default,null):Signal;
+
 	public var id(getId,null):String;
+	public var accelerator(getAccelerator,null):String;
 
 	private var _id:String;
 	private var _text:String;
@@ -25,10 +30,19 @@ class MenuItem extends WidgetContainer {
 	public function new(id:String, label:String, accelerator:String) {
 		super();
 
+		_id=id;
+		_accelerator=accelerator;
+		onClick=new Signal();
+
 		height=20;
 		width=200;
 
-		_acceleratorField=new Label("Ctrl+"+accelerator);
+		if (accelerator.toUpperCase()==accelerator)
+			_acceleratorField=new Label("Ctrl+Shift+"+accelerator.toUpperCase());
+
+		else
+			_acceleratorField=new Label("Ctrl+"+accelerator.toUpperCase());
+
 		_acceleratorField.align=Label.RIGHT;
 		_acceleratorField.left=10;
 		_acceleratorField.right=10;
@@ -66,13 +80,21 @@ class MenuItem extends WidgetContainer {
 	 * Mouse over.
 	 */
 	private function onNodeMouseUp(e:Event):Void {
-		trace("mouse up...");	
+		_node.style.backgroundColor="#ffffff";
+		onClick.dispatch();
 	}
 
 	/**
 	 * Get id.
 	 */
-	public function getId():String {
+	private function getId():String {
 		return _id;
+	}
+
+	/**
+	 * Get accelerator.
+	 */
+	private function getAccelerator():String {
+		return _accelerator;
 	}
 }

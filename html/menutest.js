@@ -500,15 +500,15 @@ var test = test || {}
 if(!test.menu) test.menu = {}
 test.menu.MenuTest = function() {
 	uifive.base.RootContainer.call(this);
+	var m;
 	var bar = new uifive.menu.MenuBar();
-	var m = new uifive.menu.Menu();
-	m.addItem(new uifive.menu.MenuItem("open","Open","H"));
-	m.addItem(new uifive.menu.MenuItem("close","Close","A"));
-	bar.addMenu("Project",m);
-	var m1 = new uifive.menu.Menu();
-	m1.addItem(new uifive.menu.MenuItem("cut","Cut","H"));
-	m1.addItem(new uifive.menu.MenuItem("paste","Paste","A"));
-	bar.addMenu("Edit",m1);
+	bar.onAction.addListener($bind(this,this.onMenuAction));
+	m = bar.createMenu("File");
+	m.createItem("open","Open","h");
+	m.createItem("close","Close","A");
+	m = bar.createMenu("Edit");
+	m.createItem("cut","Cut","x");
+	m.createItem("paste","Paste","y");
 	bar.setLeft(10);
 	bar.setTop(10);
 	this.addWidget(bar);
@@ -519,7 +519,10 @@ test.menu.MenuTest.main = function() {
 }
 test.menu.MenuTest.__super__ = uifive.base.RootContainer;
 test.menu.MenuTest.prototype = $extend(uifive.base.RootContainer.prototype,{
-	__class__: test.menu.MenuTest
+	onMenuAction: function(id) {
+		console.log("menu action: " + id);
+	}
+	,__class__: test.menu.MenuTest
 });
 if(!uifive.layout) uifive.layout = {}
 uifive.layout.Layout = function() {
@@ -590,23 +593,54 @@ if(!uifive.menu) uifive.menu = {}
 uifive.menu.Menu = function() {
 	uifive.base.WidgetContainer.call(this);
 	this.setLayout(new uifive.layout.VerticalLayout(true));
+	this.onAction = new uifive.signals.EventSignal();
 	this.setWidth(200);
 	this._node.style.borderStyle = "solid";
 	this._node.style.borderWidth = "1px";
 	this._node.style.borderColor = "#808080";
 	var style = this._node.style;
 	style.boxShadow = "0px 0px 5px 2px #c0c0c0";
+	this._items = new Array();
 };
 uifive.menu.Menu.__name__ = true;
 uifive.menu.Menu.__super__ = uifive.base.WidgetContainer;
 uifive.menu.Menu.prototype = $extend(uifive.base.WidgetContainer.prototype,{
-	addItem: function(item) {
+	getMenuItemById: function(id) {
+		var _g = 0, _g1 = this._items;
+		while(_g < _g1.length) {
+			var item = _g1[_g];
+			++_g;
+			if(item.getId() == id) return item;
+		}
+		return null;
+	}
+	,getMenuItemByAccelerator: function(accelerator) {
+		var _g = 0, _g1 = this._items;
+		while(_g < _g1.length) {
+			var item = _g1[_g];
+			++_g;
+			if(item.getAccelerator() == accelerator) return item;
+		}
+		return null;
+	}
+	,onItemClick: function(id) {
+		this.onAction.dispatch(id);
+	}
+	,createItem: function(id,label,accelerator) {
+		var item = new uifive.menu.MenuItem(id,label,accelerator);
+		this.addItem(item);
+		return item;
+	}
+	,addItem: function(item) {
 		this.addWidget(item);
+		this._items.push(item);
+		item.onClick.addListenerWithParameter($bind(this,this.onItemClick),item.getId());
 	}
 	,__class__: uifive.menu.Menu
 });
 uifive.menu.MenuBar = function() {
 	uifive.base.WidgetContainer.call(this);
+	this.onAction = new uifive.signals.EventSignal();
 	var h = new uifive.layout.HorizontalLayout(true);
 	h.setGap(10);
 	this.setLayout(h);
@@ -617,7 +651,39 @@ uifive.menu.MenuBar = function() {
 uifive.menu.MenuBar.__name__ = true;
 uifive.menu.MenuBar.__super__ = uifive.base.WidgetContainer;
 uifive.menu.MenuBar.prototype = $extend(uifive.base.WidgetContainer.prototype,{
-	onRootMouseDown: function(e) {
+	onWindowKeyDown: function(e) {
+		if(e.ctrlKey) {
+			var s = String.fromCharCode(e.keyCode);
+			if(e.shiftKey) s = s.toUpperCase(); else s = s.toLowerCase();
+			var item = this.getMenuItemByAccelerator(s);
+			if(item != null) this.onAction.dispatch(item.getId());
+		}
+	}
+	,getMenuItemById: function(id) {
+		var _g = 0, _g1 = this._menus;
+		while(_g < _g1.length) {
+			var menu = _g1[_g];
+			++_g;
+			var item = menu.getMenuItemById(id);
+			if(item != null) return item;
+		}
+		return null;
+	}
+	,getMenuItemByAccelerator: function(accelerator) {
+		var _g = 0, _g1 = this._menus;
+		while(_g < _g1.length) {
+			var menu = _g1[_g];
+			++_g;
+			var item = menu.getMenuItemByAccelerator(accelerator);
+			if(item != null) return item;
+		}
+		return null;
+	}
+	,setContainer: function(w) {
+		js.Lib.document.onkeydown = $bind(this,this.onWindowKeyDown);
+		return uifive.base.WidgetContainer.prototype.setContainer.call(this,w);
+	}
+	,onRootMouseDown: function(e) {
 		if(this._visibleMenu != null) {
 			var p = uifive.utils.WidgetUtil.getGlobalPosition(this._visibleMenu);
 			if(e.x >= p.x && e.y >= p.y && e.x <= p.x + this._visibleMenu.getWidth() && e.y <= p.y + this._visibleMenu.getHeight()) return;
@@ -631,7 +697,6 @@ uifive.menu.MenuBar.prototype = $extend(uifive.base.WidgetContainer.prototype,{
 	}
 	,onButtonClick: function(index) {
 		this.hideMenu();
-		console.log("button click: " + index + " menu: " + Std.string(this._menus[index]));
 		var root = uifive.utils.WidgetUtil.getRootContainer(this);
 		root.onMouseDown.addListener($bind(this,this.onRootMouseDown));
 		var p = uifive.utils.WidgetUtil.getGlobalPosition(this._buttons[index]);
@@ -641,21 +706,34 @@ uifive.menu.MenuBar.prototype = $extend(uifive.base.WidgetContainer.prototype,{
 		root.addWidget(m);
 		this._visibleMenu = m;
 	}
+	,onMenuAction: function(id) {
+		this.hideMenu();
+		this.onAction.dispatch(id);
+	}
+	,createMenu: function(label) {
+		var m = new uifive.menu.Menu();
+		this.addMenu(label,m);
+		return m;
+	}
 	,addMenu: function(label,menu) {
 		var b = new uifive.widgets.Button(label);
 		b.onClick.addListenerWithParameter($bind(this,this.onButtonClick),this._buttons.length);
 		b.setWidth(label.length * 8 + 10);
 		this._buttons.push(b);
 		this._menus.push(menu);
+		menu.onAction.addListener($bind(this,this.onMenuAction));
 		this.addWidget(b);
 	}
 	,__class__: uifive.menu.MenuBar
 });
 uifive.menu.MenuItem = function(id,label,accelerator) {
 	uifive.base.WidgetContainer.call(this);
+	this._id = id;
+	this._accelerator = accelerator;
+	this.onClick = new uifive.signals.Signal();
 	this.setHeight(20);
 	this.setWidth(200);
-	this._acceleratorField = new uifive.widgets.Label("Ctrl+" + accelerator);
+	if(accelerator.toUpperCase() == accelerator) this._acceleratorField = new uifive.widgets.Label("Ctrl+Shift+" + accelerator.toUpperCase()); else this._acceleratorField = new uifive.widgets.Label("Ctrl+" + accelerator.toUpperCase());
 	this._acceleratorField.setAlign("right");
 	this._acceleratorField.setLeft(10);
 	this._acceleratorField.setRight(10);
@@ -674,11 +752,15 @@ uifive.menu.MenuItem = function(id,label,accelerator) {
 uifive.menu.MenuItem.__name__ = true;
 uifive.menu.MenuItem.__super__ = uifive.base.WidgetContainer;
 uifive.menu.MenuItem.prototype = $extend(uifive.base.WidgetContainer.prototype,{
-	getId: function() {
+	getAccelerator: function() {
+		return this._accelerator;
+	}
+	,getId: function() {
 		return this._id;
 	}
 	,onNodeMouseUp: function(e) {
-		console.log("mouse up...");
+		this._node.style.backgroundColor = "#ffffff";
+		this.onClick.dispatch();
 	}
 	,onNodeMouseOut: function(e) {
 		this._node.style.backgroundColor = "#ffffff";
@@ -687,7 +769,7 @@ uifive.menu.MenuItem.prototype = $extend(uifive.base.WidgetContainer.prototype,{
 		this._node.style.backgroundColor = "#e0e0ff";
 	}
 	,__class__: uifive.menu.MenuItem
-	,__properties__: $extend(uifive.base.WidgetContainer.prototype.__properties__,{get_id:"getId"})
+	,__properties__: $extend(uifive.base.WidgetContainer.prototype.__properties__,{get_id:"getId",get_accelerator:"getAccelerator"})
 });
 if(!uifive.signals) uifive.signals = {}
 uifive.signals.EventSignal = function() {
