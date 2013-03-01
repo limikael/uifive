@@ -200,7 +200,22 @@ class Widget implements IWidget {
 	 * Add css class.
 	 */
 	public function addClass(className:String):Void {
-		_node.className=className;
+		_node.className+=" "+className;
+	}
+
+	/**
+	 * Remove css class.
+	 */
+	public function removeClass(className:String):Void {
+		var reg:EReg=new EReg("(?:^|\\s)"+className+"(?!\\S)","g");
+
+		_node.className=reg.replace(_node.className,"");
+
+/*		var cls=_node.className;
+
+		cls=cls.replace(,'');
+
+		cls=_node.className;*/
 	}
 
 	/**

@@ -23,6 +23,7 @@ class MenuBar extends WidgetContainer {
 	private var _buttons:Array<Button>;
 	private var _menus:Array<Menu>;
 	private var _visibleMenu:Menu;
+	private var _selectedButtonClass:String;
 
 	/**
 	 * Construct.
@@ -48,6 +49,13 @@ class MenuBar extends WidgetContainer {
 	public function addButtonClass(cls:String):Void {
 		for (b in _buttons)
 			b.addClass(cls);
+	}
+
+	/**
+	 * Set selected button class.
+	 */
+	public function setSelectedButtonClass(cls:String):Void {
+		_selectedButtonClass=cls;
 	}
 
 	/**
@@ -103,6 +111,8 @@ class MenuBar extends WidgetContainer {
 		m.top=p.y+30;
 		root.addWidget(m);
 		_visibleMenu=m;
+
+		_buttons[index].addClass(_selectedButtonClass);
 	}
 
 	/**
@@ -115,6 +125,9 @@ class MenuBar extends WidgetContainer {
 
 		if (_visibleMenu!=null)
 			_visibleMenu.container.removeWidget(_visibleMenu);
+
+		for (b in _buttons)
+			b.removeClass(_selectedButtonClass);
 	}
 
 	/**
