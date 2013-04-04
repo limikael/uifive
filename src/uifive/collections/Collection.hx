@@ -15,11 +15,15 @@ class Collection<ItemType> implements ICollection<ItemType> {
 	/**
 	 * Construct.
 	 */
-	public function new() {
+	public function new(src:Array<ItemType>=null) {
 		onAdd=new Signal();
 		onRemove=new Signal();
 
 		_items=new Array<ItemType>();
+
+		if (src!=null)
+			for (i in src)
+				addItem(i);
 	}
 
 	/**
