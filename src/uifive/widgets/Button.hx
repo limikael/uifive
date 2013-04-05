@@ -9,7 +9,7 @@ import uifive.signals.Signal;
 class Button extends Widget {
 
 	public var enabled(getEnabled,setEnabled):Bool;
-	public var onClick(default,null):Signal;
+	public var onClick(default,null):Signal<Void>;
 
 	private var _text:String;
 
@@ -26,7 +26,7 @@ class Button extends Widget {
 
 		setText(text);
 
-		onClick=new Signal();
+		onClick=new Signal<Void>();
 
 		_node.onclick=function(e) {
 			onClick.dispatch();

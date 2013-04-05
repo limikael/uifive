@@ -12,7 +12,7 @@ import js.Dom.Event;
  */
 class MenuItem extends WidgetContainer {
 
-	public var onClick(default,null):Signal;
+	public var onClick(default,null):Signal<Void>;
 
 	public var id(getId,null):String;
 	public var accelerator(getAccelerator,null):String;
@@ -32,7 +32,7 @@ class MenuItem extends WidgetContainer {
 
 		_id=id;
 		_accelerator=accelerator;
-		onClick=new Signal();
+		onClick=new Signal<Void>();
 
 		height=20;
 		width=200;

@@ -10,7 +10,7 @@ import js.Dom.Event;
  */
 class ButtonDecorator extends Widget {
 
-	public var onClick(default,null):Signal;
+	public var onClick(default,null):Signal<Void>;
 
 	/**
 	 * Constructor.
@@ -41,35 +41,36 @@ class ButtonDecorator extends Widget {
 		_node.onmouseup=onMouseUp;
 		_node.onmousedown=onMouseDown;
 
-		onClick=new Signal();
+		onClick=new Signal<Void>();
 	}
 
 	/**
 	 * Mouse over.
 	 */
 	private function onMouseOver(e:Event):Void {
-		setBrightness(.1);
+
+		setBrightness(1.25);
 	}
 
 	/**
 	 * Mouse over.
 	 */
 	private function onMouseOut(e:Event):Void {
-		setBrightness(0);
+		setBrightness(1);
 	}
 
 	/**
 	 * Mouse over.
 	 */
 	private function onMouseDown(e:Event):Void {
-		setBrightness(-.2);
+		setBrightness(.75);
 	}
 
 	/**
 	 * Mouse over.
 	 */
 	private function onMouseUp(e:Event):Void {
-		setBrightness(.1);
+		setBrightness(1.25);
 		onClick.dispatch();
 	}
 
@@ -77,6 +78,7 @@ class ButtonDecorator extends Widget {
 	 * Set brightness.
 	 */
 	private function setBrightness(val:Float):Void {
+		//trace("setting brightness: "+val);
 		var s:Dynamic=cast _node.style;
 
 		Reflect.setField(s,"-webkit-filter","brightness("+val+")");

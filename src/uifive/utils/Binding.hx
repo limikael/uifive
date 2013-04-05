@@ -7,7 +7,7 @@ import uifive.signals.Signal;
  */
 class Binding {
 
-	private var _signal:Signal;
+	private var _signal:Signal<Void>;
 	private var _src:Dynamic;
 	private var _srcProp:String;
 	private var _dest:Dynamic;
@@ -16,7 +16,7 @@ class Binding {
 	/**
 	 * Construct.
 	 */
-	private function new(s:Signal, d:Dynamic, dp:String, so:Dynamic, sp:String) {
+	private function new(s:Signal<Void>, d:Dynamic, dp:String, so:Dynamic, sp:String) {
 		_signal=s;
 		_src=so;
 		_srcProp=sp;
@@ -38,7 +38,7 @@ class Binding {
 	/**
 	 * Create binding.
 	 */
-	public static function create(signal:Signal, dest:Dynamic, destProp:String, src:Dynamic, srcProp:String) {
+	public static function create(signal:Signal<Void>, dest:Dynamic, destProp:String, src:Dynamic, srcProp:String) {
 		new Binding(signal,dest,destProp,src,srcProp);
 	}
 }

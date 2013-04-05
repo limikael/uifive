@@ -8,7 +8,7 @@ import uifive.widgets.Button;
 import uifive.utils.WidgetUtil;
 import uifive.utils.Point;
 import uifive.signals.MouseEvent;
-import uifive.signals.EventSignal;
+import uifive.signals.Signal;
 
 import js.Lib;
 import js.Dom.Event;
@@ -18,7 +18,7 @@ import js.Dom.Event;
  */
 class MenuBar extends WidgetContainer {
 
-	public var onAction:EventSignal<String>;
+	public var onAction:Signal<String>;
 
 	private var _buttons:Array<Button>;
 	private var _menus:Array<Menu>;
@@ -31,7 +31,7 @@ class MenuBar extends WidgetContainer {
 	public function new() {
 		super();
 
-		onAction=new EventSignal<String>();
+		onAction=new Signal<String>();
 
 		var h:HorizontalLayout=new HorizontalLayout(true);
 		h.gap=10;

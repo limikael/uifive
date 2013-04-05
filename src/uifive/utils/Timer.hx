@@ -7,7 +7,7 @@ import uifive.signals.Signal;
  */
 class Timer {
 
-	public var onTimer(default,null):Signal;
+	public var onTimer(default,null):Signal<Void>;
 
 	private var _delay:Int;
 	private var _intervalId:Int;

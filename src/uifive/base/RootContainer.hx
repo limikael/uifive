@@ -4,14 +4,13 @@ import js.Lib;
 import js.Dom.HtmlDom;
 import uifive.signals.Signal;
 import uifive.signals.MouseEvent;
-import uifive.signals.EventSignal;
 
 /**
  * Root container.
  */
 class RootContainer extends WidgetContainer {
 
-	public var onMouseDown(default,null):EventSignal<MouseEvent>;
+	public var onMouseDown(default,null):Signal<MouseEvent>;
 
 	/**
 	 * Constructor.
@@ -26,7 +25,7 @@ class RootContainer extends WidgetContainer {
 
 		updateStyle();
 
-		onMouseDown=new EventSignal<MouseEvent>();
+		onMouseDown=new Signal<MouseEvent>();
 		_node.onmousedown=function(e) {
 			var info:Dynamic=cast e;
 			var x:Int=info.pageX;

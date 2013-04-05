@@ -3,7 +3,7 @@ package uifive.base;
 import js.Dom.HtmlDom;
 import js.Dom;
 
-/** fd
+/** 
  * Base class.
  */
 class Widget implements IWidget {

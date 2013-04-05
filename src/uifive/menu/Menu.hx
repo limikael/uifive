@@ -2,14 +2,14 @@ package uifive.menu;
 
 import uifive.base.WidgetContainer;
 import uifive.layout.VerticalLayout;
-import uifive.signals.EventSignal;
+import uifive.signals.Signal;
 
 /**
  * Menu.
  */
 class Menu extends WidgetContainer {
 
-	public var onAction:EventSignal<String>;
+	public var onAction:Signal<String>;
 
 	private var _items:Array<MenuItem>;
 
@@ -20,7 +20,7 @@ class Menu extends WidgetContainer {
 		super();
 		layout=new VerticalLayout(true);
 
-		onAction=new EventSignal<String>();
+		onAction=new Signal<String>();
 
 		width=200;
 

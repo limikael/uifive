@@ -4,10 +4,10 @@ package uifive.signals;
  * Parameter listener.
  */
 class ParameterListener {
-	public var listener:Dynamic->Void;
+	public var listener:Dynamic;
 	public var parameter:Dynamic;
 
-	public function new(l:Dynamic->Void, p:Dynamic) {
+	public function new(l:Dynamic, p:Dynamic) {
 		listener=l;
 		parameter=p;
 	}
@@ -16,25 +16,28 @@ class ParameterListener {
 /**
  * Signal.
  */
-class Signal {
+class Signal<Event> {
 
 	private var _parameterListeners:Array<ParameterListener>;
-	private var _listeners:Array<Void->Void>;
-	private var _connections:Array<Signal>;
+	private var _listeners:Array<Dynamic>;
+	private var _connections:Array<Signal<Event>>;
 
 	/**
 	 * Construct.
 	 */
 	public function new() {
-		_listeners=new Array<Void->Void>();
+		_listeners=new Array<Dynamic>();
 		_parameterListeners=new Array<ParameterListener>();
-		_connections=new Array<Signal>();
+		_connections=new Array<Signal<Event>>();
 	}
 
 	/**
 	 * Add listener.
 	 */
-	public function addListener(listener:Void->Void):Void {
+	public function addListener(listener:Dynamic):Void {
+		if (!Reflect.isFunction(listener))
+			throw "Listener must be a function";
+
 		removeListener(listener);
 		_listeners.push(listener);
 	}
@@ -42,7 +45,10 @@ class Signal {
 	/**
 	 * Add listener.
 	 */
-	public function addListenerWithParameter(listener:Dynamic->Void, parameter:Dynamic):Void {
+	public function addListenerWithParameter(listener:Dynamic, parameter:Dynamic):Void {
+		if (!Reflect.isFunction(listener))
+			throw "Listener must be a function";
+
 		removeListener(listener);
 		_parameterListeners.push(new ParameterListener(listener,parameter));
 	}
@@ -69,21 +75,42 @@ class Signal {
 	/**
 	 * Connect to another signal.
 	 */
-	public function addConnection(signal:Signal):Void {
+	public function addConnection(signal:Signal<Event>):Void {
+		removeConnection(signal);
 		_connections.push(signal);
+	}
+
+	/**
+	 * Remove connection.
+	 */
+	public function removeConnection(signal:Signal<Event>):Void {
+		for (i in 0..._connections.length)
+			if (_connections[i]==signal) {
+				_connections.splice(i,0);
+				return;
+			}
+	}
+
+	/**
+	 * Remove all.
+	 */
+	public function removeAll():Void {
+		_listeners=new Array<Dynamic>();
+		_parameterListeners=new Array<ParameterListener>();
+		_connections=new Array<Signal<Event>>();
 	}
 
 	/**
 	 * Dispatch.
 	 */
-	public function dispatch():Void {
+	public function dispatch(?e:Event=null):Void {
 		for (listener in _listeners)
-			listener();
+			listener(e);
 
 		for (connection in _connections)
-			connection.dispatch();
+			connection.dispatch(e);
 
 		for (parameterListener in _parameterListeners)
-			parameterListener.listener(parameterListener.parameter);
+			parameterListener.listener(parameterListener.parameter,e);
 	}
 }

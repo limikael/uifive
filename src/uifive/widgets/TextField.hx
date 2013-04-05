@@ -10,7 +10,7 @@ import js.Dom.FormElement;
  */
 class TextField extends Widget {
 
-	public var onChange(default,null):Signal;
+	public var onChange(default,null):Signal<Void>;
 
 	public var enabled(getEnabled,setEnabled):Bool;
 	public var text(getText,setText):String;
@@ -31,7 +31,7 @@ class TextField extends Widget {
 
 		setText(text);
 
-		onChange=new Signal();
+		onChange=new Signal<Void>();
 
 		_formNode.onkeyup=function(e) {
 			onChange.dispatch();
