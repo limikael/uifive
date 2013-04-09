@@ -2,6 +2,8 @@ package uifive.base;
 
 import js.Lib;
 import js.Dom.HtmlDom;
+import js.Dom;
+
 import uifive.signals.Signal;
 import uifive.signals.MouseEvent;
 
@@ -11,6 +13,8 @@ import uifive.signals.MouseEvent;
 class RootContainer extends WidgetContainer {
 
 	public var onMouseDown(default,null):Signal<MouseEvent>;
+	public var onMouseMove(default,null):Signal<MouseEvent>;
+	public var onMouseUp(default,null):Signal<MouseEvent>;
 
 	/**
 	 * Constructor.
@@ -26,13 +30,27 @@ class RootContainer extends WidgetContainer {
 		updateStyle();
 
 		onMouseDown=new Signal<MouseEvent>();
-		_node.onmousedown=function(e) {
-			var info:Dynamic=cast e;
-			var x:Int=info.pageX;
-			var y:Int=info.pageY;
+		_node.onmousedown=function(e:Dynamic) {
+			var x:Int=e.pageX;
+			var y:Int=e.pageY;
 
-			//trace("down: "++" "+info.pageY);
 			onMouseDown.dispatch(new MouseEvent(x,y));
+		}
+
+		onMouseUp=new Signal<MouseEvent>();
+		_node.onmouseup=function(e:Dynamic) {
+			var x:Int=e.pageX;
+			var y:Int=e.pageY;
+
+			onMouseUp.dispatch(new MouseEvent(x,y));
+		}
+
+		onMouseMove=new Signal<MouseEvent>();
+		_node.onmousemove=function(e:Dynamic) {
+			var x:Int=e.pageX;
+			var y:Int=e.pageY;
+
+			onMouseMove.dispatch(new MouseEvent(x,y));
 		}
 	}
 

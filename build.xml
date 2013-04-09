@@ -40,4 +40,20 @@
 			<arg value="test.menu.MenuTest"/>
 		</exec>
 	</target>
+
+	<target name="canvaswidgettest">
+		<exec executable="haxe" failonerror="true">
+			<arg value="-debug"/>
+			<arg value="-cp"/>
+			<arg value="src"/>
+			<arg value="-cp"/>
+			<arg value="test"/>
+			<arg value="-lib"/>
+			<arg value="html5"/>
+			<arg value="-js"/>
+			<arg value="html/basetest.js"/>
+			<arg value="-main"/>
+			<arg value="test.widgets.CanvasWidgetTest"/>
+		</exec>
+	</target>
 </project>

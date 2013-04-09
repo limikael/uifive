@@ -3,6 +3,21 @@ package uifive.utils;
 import uifive.signals.Signal;
 
 /**
+ * Data for call later timers.
+ */
+class CallLaterData {
+
+	public var timer:Timer;
+	public var cb:Void->Void;
+
+	/**
+	 * Construct.
+	 */
+	public function new() {
+	}
+}
+
+/**
  * Timer.
  */
 class Timer {
@@ -16,7 +31,7 @@ class Timer {
 	 * Create timer.
 	 */
 	public function new(delay:Int) {
-		onTimer=new Signal();
+		onTimer=new Signal<Void>();
 
 		_delay=delay;
 	}
@@ -45,5 +60,30 @@ class Timer {
 			untyped window.clearInterval(_intervalId);
 
 		_intervalId=-1;
+	}
+
+	/**
+	 * Call a function later.
+	 */
+	public static function callLater(f:Void->Void):Void {
+		var t:Timer=new Timer(0);
+
+		var data:CallLaterData=new CallLaterData();
+		data.timer=t;
+		data.cb=f;
+
+		t.onTimer.addListenerWithParameter(onCallLaterTimer,data);
+		t.start();
+	}
+
+	/**
+	 * On call later timer.
+	 */
+	private static function onCallLaterTimer(data:CallLaterData):Void {
+		trace("call later timer..");
+		data.timer.stop();
+		data.timer.onTimer.removeListener(onCallLaterTimer);
+
+		data.cb();
 	}
 }

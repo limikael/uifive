@@ -3,6 +3,58 @@ function $extend(from, fields) {
 	for (var name in fields) proto[name] = fields[name];
 	return proto;
 }
+var EReg = function(r,opt) {
+	opt = opt.split("u").join("");
+	this.r = new RegExp(r,opt);
+};
+EReg.__name__ = true;
+EReg.prototype = {
+	customReplace: function(s,f) {
+		var buf = new StringBuf();
+		while(true) {
+			if(!this.match(s)) break;
+			buf.b += Std.string(this.matchedLeft());
+			buf.b += Std.string(f(this));
+			s = this.matchedRight();
+		}
+		buf.b += Std.string(s);
+		return buf.b;
+	}
+	,replace: function(s,by) {
+		return s.replace(this.r,by);
+	}
+	,split: function(s) {
+		var d = "#__delim__#";
+		return s.replace(this.r,d).split(d);
+	}
+	,matchedPos: function() {
+		if(this.r.m == null) throw "No string matched";
+		return { pos : this.r.m.index, len : this.r.m[0].length};
+	}
+	,matchedRight: function() {
+		if(this.r.m == null) throw "No string matched";
+		var sz = this.r.m.index + this.r.m[0].length;
+		return this.r.s.substr(sz,this.r.s.length - sz);
+	}
+	,matchedLeft: function() {
+		if(this.r.m == null) throw "No string matched";
+		return this.r.s.substr(0,this.r.m.index);
+	}
+	,matched: function(n) {
+		return this.r.m != null && n >= 0 && n < this.r.m.length?this.r.m[n]:(function($this) {
+			var $r;
+			throw "EReg::matched";
+			return $r;
+		}(this));
+	}
+	,match: function(s) {
+		if(this.r.global) this.r.lastIndex = 0;
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
+	,__class__: EReg
+}
 var HxOverrides = function() { }
 HxOverrides.__name__ = true;
 HxOverrides.dateStr = function(date) {
@@ -178,6 +230,25 @@ Std.parseFloat = function(x) {
 }
 Std.random = function(x) {
 	return Math.floor(Math.random() * x);
+}
+var StringBuf = function() {
+	this.b = "";
+};
+StringBuf.__name__ = true;
+StringBuf.prototype = {
+	toString: function() {
+		return this.b;
+	}
+	,addSub: function(s,pos,len) {
+		this.b += HxOverrides.substr(s,pos,len);
+	}
+	,addChar: function(c) {
+		this.b += String.fromCharCode(c);
+	}
+	,add: function(x) {
+		this.b += Std.string(x);
+	}
+	,__class__: StringBuf
 }
 var js = js || {}
 js.Boot = function() { }
@@ -361,8 +432,15 @@ uifive.base.Widget.prototype = {
 		this._node.style.bottom = this._bottom == null?"auto":this._bottom + "px";
 		if(this._top != null && this._bottom != null) this._node.style.height = "auto"; else this._node.style.height = this._height == null?"auto":this._height + "px";
 	}
+	,removeClass: function(className) {
+		var reg = new EReg("(?:^|\\s)" + className + "(?!\\S)","g");
+		this._node.className = reg.replace(this._node.className,"");
+	}
 	,addClass: function(className) {
-		this._node.className = className;
+		this._node.className += " " + className;
+	}
+	,getContainer: function() {
+		return this._container;
 	}
 	,setContainer: function(w) {
 		this._container = w;
@@ -427,7 +505,7 @@ uifive.base.Widget.prototype = {
 		return this._node;
 	}
 	,__class__: uifive.base.Widget
-	,__properties__: {set_width:"setWidth",get_width:"getWidth",set_height:"setHeight",get_height:"getHeight",set_left:"setLeft",get_left:"getLeft",set_top:"setTop",get_top:"getTop",set_right:"setRight",get_right:"getRight",set_bottom:"setBottom",get_bottom:"getBottom",set_container:"setContainer",get_node:"getNode"}
+	,__properties__: {set_width:"setWidth",get_width:"getWidth",set_height:"setHeight",get_height:"getHeight",set_left:"setLeft",get_left:"getLeft",set_top:"setTop",get_top:"getTop",set_right:"setRight",get_right:"getRight",set_bottom:"setBottom",get_bottom:"getBottom",set_container:"setContainer",get_container:"getContainer",get_node:"getNode"}
 }
 uifive.base.WidgetContainer = function() {
 	uifive.base.Widget.call(this);
@@ -469,12 +547,20 @@ uifive.base.WidgetContainer.prototype = $extend(uifive.base.Widget.prototype,{
 	,__properties__: $extend(uifive.base.Widget.prototype.__properties__,{set_layout:"setLayout",get_layout:"getLayout",get_widgets:"getWidgets"})
 });
 uifive.base.RootContainer = function() {
+	var _g = this;
 	uifive.base.WidgetContainer.call(this);
 	this.setLeft(0);
 	this.setRight(0);
 	this.setTop(0);
 	this.setBottom(0);
 	this.updateStyle();
+	this.onMouseDown = new uifive.signals.Signal();
+	this._node.onmousedown = function(e) {
+		var info = e;
+		var x = info.pageX;
+		var y = info.pageY;
+		_g.onMouseDown.dispatch(new uifive.signals.MouseEvent(x,y));
+	};
 };
 uifive.base.RootContainer.__name__ = true;
 uifive.base.RootContainer.__super__ = uifive.base.WidgetContainer;
@@ -486,29 +572,31 @@ uifive.base.RootContainer.prototype = $extend(uifive.base.WidgetContainer.protot
 	,__class__: uifive.base.RootContainer
 });
 var test = test || {}
-if(!test.base) test.base = {}
-test.base.SignalTest = function() {
+if(!test.widgets) test.widgets = {}
+test.widgets.CanvasWidgetTest = function() {
 	uifive.base.RootContainer.call(this);
-	this._testSignal = new uifive.signals.Signal();
-	this._testSignal.addListener($bind(this,this.testListener));
-	this._testSignal.dispatch();
-	this._testEventSignal = new uifive.signals.EventSignal();
-	this._testEventSignal.addListener($bind(this,this.testEventListener));
-	this._testEventSignal.dispatch(5);
-	console.log("here..");
+	this._canvasWidget = new uifive.widgets.CanvasWidget();
+	this._canvasWidget.setLeft(0);
+	this._canvasWidget.setTop(0);
+	this._canvasWidget.setRight(0);
+	this._canvasWidget.setBottom(0);
+	this.addWidget(this._canvasWidget);
+	var c = this._canvasWidget.getContext();
+	c.strokeStyle = "#ff0000";
+	c.lineWidth = 1;
+	c.beginPath();
+	c.moveTo(500.5,0);
+	c.lineTo(500.5,100);
+	c.stroke();
 };
-test.base.SignalTest.__name__ = true;
-test.base.SignalTest.main = function() {
-	new test.base.SignalTest().attach("testcontainer");
+test.widgets.CanvasWidgetTest.__name__ = true;
+test.widgets.CanvasWidgetTest.main = function() {
+	console.log("canvas widget test");
+	new test.widgets.CanvasWidgetTest().attach("testcontainer");
 }
-test.base.SignalTest.__super__ = uifive.base.RootContainer;
-test.base.SignalTest.prototype = $extend(uifive.base.RootContainer.prototype,{
-	testEventListener: function(i) {
-		console.log("dispatched: " + i);
-	}
-	,testListener: function() {
-	}
-	,__class__: test.base.SignalTest
+test.widgets.CanvasWidgetTest.__super__ = uifive.base.RootContainer;
+test.widgets.CanvasWidgetTest.prototype = $extend(uifive.base.RootContainer.prototype,{
+	__class__: test.widgets.CanvasWidgetTest
 });
 if(!uifive.layout) uifive.layout = {}
 uifive.layout.Layout = function() {
@@ -527,66 +615,66 @@ uifive.layout.Layout.prototype = {
 	,__properties__: {set_target:"setTarget"}
 }
 if(!uifive.signals) uifive.signals = {}
-uifive.signals.EventSignal = function() {
-	this._listeners = new Array();
-	this._connections = new Array();
+uifive.signals.MouseEvent = function(pX,pY) {
+	this.x = pX;
+	this.y = pY;
 };
-uifive.signals.EventSignal.__name__ = true;
-uifive.signals.EventSignal.prototype = {
-	dispatch: function(event) {
-		var _g = 0, _g1 = this._listeners;
-		while(_g < _g1.length) {
-			var listener = _g1[_g];
-			++_g;
-			listener(event);
-		}
-		var _g = 0, _g1 = this._connections;
-		while(_g < _g1.length) {
-			var connection = _g1[_g];
-			++_g;
-			connection.dispatch(event);
-		}
-	}
-	,addConnection: function(signal) {
-		this._connections.push(signal);
-	}
-	,removeListener: function(listener) {
-		var _g1 = 0, _g = this._listeners.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			if(Reflect.compareMethods(this._listeners[i],listener)) {
-				this._listeners.splice(i,1);
-				return;
-			}
-		}
-	}
-	,addListener: function(listener) {
-		this.removeListener(listener);
-		this._listeners.push(listener);
-	}
-	,__class__: uifive.signals.EventSignal
+uifive.signals.MouseEvent.__name__ = true;
+uifive.signals.MouseEvent.prototype = {
+	__class__: uifive.signals.MouseEvent
+}
+uifive.signals.ParameterListener = function(l,p) {
+	this.listener = l;
+	this.parameter = p;
+};
+uifive.signals.ParameterListener.__name__ = true;
+uifive.signals.ParameterListener.prototype = {
+	__class__: uifive.signals.ParameterListener
 }
 uifive.signals.Signal = function() {
 	this._listeners = new Array();
+	this._parameterListeners = new Array();
 	this._connections = new Array();
 };
 uifive.signals.Signal.__name__ = true;
 uifive.signals.Signal.prototype = {
-	dispatch: function() {
+	dispatch: function(e) {
 		var _g = 0, _g1 = this._listeners;
 		while(_g < _g1.length) {
 			var listener = _g1[_g];
 			++_g;
-			listener();
+			listener(e);
 		}
 		var _g = 0, _g1 = this._connections;
 		while(_g < _g1.length) {
 			var connection = _g1[_g];
 			++_g;
-			connection.dispatch();
+			connection.dispatch(e);
+		}
+		var _g = 0, _g1 = this._parameterListeners;
+		while(_g < _g1.length) {
+			var parameterListener = _g1[_g];
+			++_g;
+			parameterListener.listener(parameterListener.parameter,e);
+		}
+	}
+	,removeAll: function() {
+		this._listeners = new Array();
+		this._parameterListeners = new Array();
+		this._connections = new Array();
+	}
+	,removeConnection: function(signal) {
+		var _g1 = 0, _g = this._connections.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(this._connections[i] == signal) {
+				this._connections.splice(i,0);
+				return;
+			}
 		}
 	}
 	,addConnection: function(signal) {
+		this.removeConnection(signal);
 		this._connections.push(signal);
 	}
 	,removeListener: function(listener) {
@@ -598,8 +686,22 @@ uifive.signals.Signal.prototype = {
 				return;
 			}
 		}
+		var _g1 = 0, _g = this._parameterListeners.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(Reflect.compareMethods(this._parameterListeners[i].listener,listener)) {
+				this._parameterListeners.splice(i,1);
+				return;
+			}
+		}
+	}
+	,addListenerWithParameter: function(listener,parameter) {
+		if(!Reflect.isFunction(listener)) throw "Listener must be a function";
+		this.removeListener(listener);
+		this._parameterListeners.push(new uifive.signals.ParameterListener(listener,parameter));
 	}
 	,addListener: function(listener) {
+		if(!Reflect.isFunction(listener)) throw "Listener must be a function";
 		this.removeListener(listener);
 		this._listeners.push(listener);
 	}
@@ -630,6 +732,77 @@ uifive.utils.ArrayTools.indexOf = function(arr,val) {
 	}
 	return -1;
 }
+uifive.utils.CallLaterData = function() {
+};
+uifive.utils.CallLaterData.__name__ = true;
+uifive.utils.CallLaterData.prototype = {
+	__class__: uifive.utils.CallLaterData
+}
+uifive.utils.Timer = function(delay) {
+	this.onTimer = new uifive.signals.Signal();
+	this._delay = delay;
+};
+uifive.utils.Timer.__name__ = true;
+uifive.utils.Timer.callLater = function(f) {
+	var t = new uifive.utils.Timer(0);
+	var data = new uifive.utils.CallLaterData();
+	data.timer = t;
+	data.cb = f;
+	t.onTimer.addListenerWithParameter(uifive.utils.Timer.onCallLaterTimer,data);
+	t.start();
+}
+uifive.utils.Timer.onCallLaterTimer = function(data) {
+	console.log("call later timer..");
+	data.timer.stop();
+	data.timer.onTimer.removeListener(uifive.utils.Timer.onCallLaterTimer);
+	data.cb();
+}
+uifive.utils.Timer.prototype = {
+	stop: function() {
+		if(this._intervalId >= 0) window.clearInterval(this._intervalId);
+		this._intervalId = -1;
+	}
+	,onInterval: function() {
+		this.onTimer.dispatch();
+	}
+	,start: function() {
+		this.stop();
+		this._intervalId = window.setInterval($bind(this,this.onInterval),this._delay);
+	}
+	,__class__: uifive.utils.Timer
+}
+if(!uifive.widgets) uifive.widgets = {}
+uifive.widgets.CanvasWidget = function() {
+	this._node = js.Lib.document.createElement("canvas");
+	this._canvasNode = this._node;
+	this._canvasNode.width = js.Lib.window.innerWidth;
+	this._canvasNode.height = js.Lib.window.innerHeight;
+	if(this._canvasNode == null) throw "Canvas not available";
+	this._context = this._canvasNode.getContext("2d");
+	if(this._context == null) throw "Unable to get canvas context";
+	uifive.base.Widget.call(this);
+};
+uifive.widgets.CanvasWidget.__name__ = true;
+uifive.widgets.CanvasWidget.__super__ = uifive.base.Widget;
+uifive.widgets.CanvasWidget.prototype = $extend(uifive.base.Widget.prototype,{
+	getCanvas: function() {
+		return this._canvasNode;
+	}
+	,afterSetContainer: function() {
+		console.log("*** after set container, w=" + this._canvasNode.offsetWidth);
+	}
+	,setContainer: function(w) {
+		uifive.base.Widget.prototype.setContainer.call(this,w);
+		console.log("set container... calling later...");
+		uifive.utils.Timer.callLater($bind(this,this.afterSetContainer));
+		return w;
+	}
+	,getContext: function() {
+		return this._context;
+	}
+	,__class__: uifive.widgets.CanvasWidget
+	,__properties__: $extend(uifive.base.Widget.prototype.__properties__,{get_context:"getContext",get_canvas:"getCanvas"})
+});
 var $_;
 function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };
 if(Array.prototype.indexOf) HxOverrides.remove = function(a,o) {
@@ -672,6 +845,6 @@ if(typeof window != "undefined") {
 		return f(msg,[url + ":" + line]);
 	};
 }
-test.base.SignalTest.main();
+test.widgets.CanvasWidgetTest.main();
 
 //@ sourceMappingURL=basetest.js.map

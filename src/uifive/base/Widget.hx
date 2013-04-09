@@ -44,7 +44,7 @@ class Widget implements IWidget {
 		_height=20;
 		updateStyle();
 	}
- 
+
 	/**
 	 * Get DOM node.
 	 */
@@ -181,7 +181,7 @@ class Widget implements IWidget {
 	/**
 	 * Set container.
 	 */
-	private function setContainer(w):WidgetContainer {
+	private function setContainer(w:WidgetContainer):WidgetContainer {
 		_container=w;
 
 		updateStyle();
