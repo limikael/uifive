@@ -12,6 +12,8 @@ import js.Dom.Event;
  */
 class MenuItem extends WidgetContainer {
 
+	public var label(null,setLabel):String;
+	public var enabled(getEnabled,setEnabled):Bool;
 	public var onClick(default,null):Signal<Void>;
 
 	public var id(getId,null):String;
@@ -23,6 +25,7 @@ class MenuItem extends WidgetContainer {
 
 	private var _labelField:Label;
 	private var _acceleratorField:Label;
+	private var _enabled:Bool;
 
 	/**
 	 * Construct.
@@ -30,6 +33,7 @@ class MenuItem extends WidgetContainer {
 	public function new(id:String, label:String, accelerator:String) {
 		super();
 
+		_enabled=true;
 		_id=id;
 		_accelerator=accelerator;
 		onClick=new Signal<Void>();
@@ -67,10 +71,41 @@ class MenuItem extends WidgetContainer {
 	}
 
 	/**
+	 * Set label.
+	 */
+	private function setLabel(v:String):String {
+		_labelField.text=v;
+		return v;
+	}
+
+	/**
+	 * Set enabled.
+	 */
+	private function setEnabled(v:Bool):Bool {
+		_enabled=v;
+
+		if (_enabled)
+			_node.style.color="#000000";
+
+		else
+			_node.style.color="#808080";
+
+		return _enabled;
+	}
+
+	/**
+	 * Get enabled.
+	 */
+	private function getEnabled():Bool {
+		return _enabled;
+	}
+
+	/**
 	 * Mouse over.
 	 */
 	private function onNodeMouseOver(e:Event):Void {
-		_node.style.backgroundColor="#e0e0ff";
+		if (_enabled)
+			_node.style.backgroundColor="#e0e0ff";
 	}
 
 	/**
@@ -85,7 +120,9 @@ class MenuItem extends WidgetContainer {
 	 */
 	private function onNodeMouseUp(e:Event):Void {
 		_node.style.backgroundColor="#ffffff";
-		onClick.dispatch();
+
+		if (_enabled)
+			onClick.dispatch();
 	}
 
 	/**

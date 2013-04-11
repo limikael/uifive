@@ -11,15 +11,20 @@ class DataContainer<ItemType> extends WidgetContainer {
 
 	public var dataProvider(null,setDataProvider):ICollection<ItemType>;
 	public var itemRenderer(null,setItemRenderer):Class<IItemRenderer<ItemType>>;
+	public var itemRendererFunc(null,setItemRendererFunc):Void->IItemRenderer<ItemType>;
 
 	private var _dataProvider:ICollection<ItemType>;
 	private var _itemRendererClass:Class<IItemRenderer<ItemType>>;
+	private var _itemRendererFunc:Void->IItemRenderer<ItemType>;
+	private var _renderers:Array<IItemRenderer<ItemType>>;
 
 	/**
 	 * Construct.
 	 */
 	public function new() {
 		super();
+
+		_renderers=new Array<IItemRenderer<ItemType>>();
 	}
 
 	/**
@@ -55,6 +60,17 @@ class DataContainer<ItemType> extends WidgetContainer {
 	}
 
 	/**
+	 * Set item renderer func.
+	 */
+	public function setItemRendererFunc(value:Void->IItemRenderer<ItemType>):Void->IItemRenderer<ItemType> {
+		_itemRendererFunc=value;
+
+		updateAll();
+
+		return _itemRendererFunc;
+	}
+
+	/**
 	 * Add.
 	 */
 	private function onDataProviderAdd():Void {
@@ -72,17 +88,36 @@ class DataContainer<ItemType> extends WidgetContainer {
 	 * Update all.
 	 */
 	private function updateAll():Void {
-		for (w in widgets)
-			removeWidget(w);
+		for (r in _renderers) {
+			removeWidget(r);
+			r.setData(null);
+		}
 
-		if (_itemRendererClass!=null) {
+		_renderers=new Array<IItemRenderer<ItemType>>();
+
+		if (_itemRendererClass!=null || _itemRendererFunc!=null) {
 			for (data in _dataProvider) {
-				var renderer:IItemRenderer<ItemType>=Type.createInstance(_itemRendererClass,[]);
+				var renderer:IItemRenderer<ItemType>=createItemRenderer();
 
 				renderer.setData(data);
+				_renderers.push(renderer);
 
 				addWidget(renderer);
 			}
 		}
+	}
+
+	/**
+	 * Create item renderer.
+	 */
+	private function createItemRenderer():IItemRenderer<ItemType> {
+		if (_itemRendererFunc!=null)
+			return _itemRendererFunc();
+
+		else if (_itemRendererClass!=null)
+			return Type.createInstance(_itemRendererClass,[]);
+
+		else
+			throw "no item renderer set!";
 	}
 }

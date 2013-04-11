@@ -38,7 +38,14 @@ class Binding {
 	/**
 	 * Create binding.
 	 */
-	public static function create(signal:Signal<Void>, dest:Dynamic, destProp:String, src:Dynamic, srcProp:String) {
-		new Binding(signal,dest,destProp,src,srcProp);
+	public static function create(signal:Signal<Void>, dest:Dynamic, destProp:String, src:Dynamic, srcProp:String):Binding {
+		return new Binding(signal,dest,destProp,src,srcProp);
+	}
+
+	/**
+	 * Disconnect.
+	 */
+	public function disconnect():Void {
+		_signal.removeListener(onSignal);
 	}
 }

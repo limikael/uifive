@@ -194,7 +194,7 @@ class MenuBar extends WidgetContainer {
 
 			var item:MenuItem=getMenuItemByAccelerator(s);
 
-			if (item!=null)
+			if (item!=null && item.enabled)
 				onAction.dispatch(item.id);
 		}
 	}

@@ -11,7 +11,9 @@ interface ICollection<ItemType> {
 
 	function addItem(item:ItemType):Void;
 	function removeItemAt(index:Int):Void;
+	function removeItem(item:ItemType):Void;
 	function getItemAt(index:Int):ItemType;
+	function getItemIndex(item:ItemType):Int;
 	function getLength():Int;
 
 	function iterator():Iterator<ItemType>;

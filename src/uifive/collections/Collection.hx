@@ -56,6 +56,27 @@ class Collection<ItemType> implements ICollection<ItemType> {
 	}
 
 	/**
+	 * Get item index.
+	 */
+	public function getItemIndex(item:ItemType):Int {
+		for (i in 0..._items.length)
+			if (_items[i]==item)
+				return i;
+
+		return -1;
+	}
+
+	/**
+	 * Remove item.
+	 */
+	public function removeItem(item:ItemType):Void {
+		var index:Int=getItemIndex(item);
+
+		if (index>=0)
+			removeItemAt(index);
+	}
+
+	/**
 	 * Get length.
 	 */
 	public function getLength():Int {

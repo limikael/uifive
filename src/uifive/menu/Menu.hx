@@ -48,7 +48,7 @@ class Menu extends WidgetContainer {
 	/**
 	 * Create and add menu item.
 	 */
-	public function createItem(id:String, label:String, accelerator:String):MenuItem {
+	public function createItem(id:String, label:String, accelerator:String=null):MenuItem {
 		var item:MenuItem=new MenuItem(id,label,accelerator);
 
 		addItem(item);
