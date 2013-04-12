@@ -7,6 +7,8 @@ import uifive.widgets.ButtonDecorator;
 import uifive.layout.HorizontalLayout;
 import uifive.signals.Signal;
 
+import js.Dom;
+
 /**
  * Tab bar.
  */
@@ -42,6 +44,11 @@ class TabBar extends WidgetContainer {
 
 		b.onClick.addListenerWithParameter(onButtonClick,_buttons.length);
 
+		var i:Int=_buttons.length;
+		b.node.onmousedown=function(e:Event) {
+			onButtonClick(i);
+		}
+
 		_buttons.push(b);
 		addWidget(b);
 
@@ -54,6 +61,8 @@ class TabBar extends WidgetContainer {
 	 */
 	private function onButtonClick(index:Int):Void {
 		selectedIndex=index;
+
+		onChange.dispatch();
 	}
 
 	/**

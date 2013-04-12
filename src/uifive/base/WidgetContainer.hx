@@ -8,7 +8,6 @@ import uifive.utils.ArrayTools;
  */
 class WidgetContainer extends Widget {
 
-//	public var onResize(default,null):Void;
 	public var layout(getLayout,setLayout):Layout;
 	public var widgets(getWidgets,null):Array<IWidget>;
 
@@ -21,13 +20,12 @@ class WidgetContainer extends Widget {
 	public function new() {
 		super();
 
-//		onResize=new Signal<Void>();
 		_widgets=[];
 		_layout=null;
 
-		node.onresize=function(e) {
+		/*node.onresize=function(e) {
 			trace("resize...");
-		}
+		}*/
 	}
 
 	/**
