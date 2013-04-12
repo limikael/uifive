@@ -16,6 +16,7 @@ class TabBar extends WidgetContainer {
 
 	public var onChange(default,null):Signal<Void>;
 	public var selectedIndex(getSelectedIndex,setSelectedIndex):Int;
+	public var selectedButtonClass(null,setSelectedButtonClass):String;
 
 	private var _buttons:Array<Button>;
 	private var _selectedButtonClass:String=null;
@@ -76,11 +77,13 @@ class TabBar extends WidgetContainer {
 	/**
 	 * Set selected button class.
 	 */
-	public function setSelectedButtonClass(cls:String):Void {
+	public function setSelectedButtonClass(cls:String):String {
 		_selectedButtonClass=cls;
 
 		if (_selectedIndex>=0 && _selectedIndex<_buttons.length)
 			_buttons[_selectedIndex].addClass(_selectedButtonClass);
+
+		return cls;
 	}
 
 	/**

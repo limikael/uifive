@@ -41,6 +41,7 @@ class Pager extends WidgetContainer {
 			removeWidget(w);
 
 		addWidget(_pages[v]);
+		_pages[v].notifyLayout();
 		_currentIndex=v;
 
 		return v;
