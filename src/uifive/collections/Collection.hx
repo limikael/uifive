@@ -30,9 +30,10 @@ class Collection<ItemType> implements ICollection<ItemType> {
 	 * Add item.
 	 */
 	public function addItem(item:ItemType) {
-		_items.push(item);
+		if (getItemIndex(item)>=0)
+			return;
 
-		//trace("dispatching add..");
+		_items.push(item);
 
 		onAdd.dispatch();
 	}

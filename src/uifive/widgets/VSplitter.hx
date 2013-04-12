@@ -94,6 +94,11 @@ class VSplitter extends WidgetContainer {
 	private function updateSizes() {
 		_leftContainer.width=_splitter.left;
 		_rightContainer.width=node.offsetWidth-_splitter.left-10;
+
+		_leftContainer.notifyLayout();
+		_rightContainer.notifyLayout();
+/*		_leftContainer.onResize.dispatch();
+		_rightContainer.onResize.dispatch();*/
 	}
 
 	/**

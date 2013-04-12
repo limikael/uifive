@@ -243,4 +243,10 @@ class Widget implements IWidget {
 		else
 			_node.style.height=(_height==null)?"auto":_height+"px";
 	}	
+
+	/**
+	 * Notify layout.
+	 */
+	public function notifyLayout():Void {
+	}
 }

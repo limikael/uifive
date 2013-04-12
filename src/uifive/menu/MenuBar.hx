@@ -33,7 +33,8 @@ class MenuBar extends WidgetContainer {
 
 		onAction=new Signal<String>();
 
-		var h:HorizontalLayout=new HorizontalLayout(true);
+		var h:HorizontalLayout=new HorizontalLayout();
+		h.resizeParent=true;
 		h.gap=10;
 		layout=h;
 

@@ -80,7 +80,7 @@ class Timer {
 	 * On call later timer.
 	 */
 	private static function onCallLaterTimer(data:CallLaterData):Void {
-		trace("call later timer..");
+		//trace("call later timer..");
 		data.timer.stop();
 		data.timer.onTimer.removeListener(onCallLaterTimer);
 

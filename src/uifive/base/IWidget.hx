@@ -18,4 +18,6 @@ interface IWidget {
 	public var right(null,setRight):Int;
 	public var bottom(null,setBottom):Int;
 
+	public function notifyLayout():Void;
+
 }
