@@ -48,7 +48,6 @@ class ButtonDecorator extends Widget {
 	 * Mouse over.
 	 */
 	private function onMouseOver(e:Event):Void {
-
 		setBrightness(1.25);
 	}
 

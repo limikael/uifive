@@ -8,6 +8,8 @@ import js.Dom;
  */
 class Widget implements IWidget {
 
+	//public var onMouseDown(default,null):Signal<Void>;
+
 	public var width(getWidth,setWidth):Int;
 	public var height(getHeight,setHeight):Int;
 	public var left(getLeft,setLeft):Int;
@@ -30,9 +32,14 @@ class Widget implements IWidget {
 	/**
 	 * Construct.
 	 */
-	public function new() {
+	public function new(n:HtmlDom=null) {
+		if (n!=null)
+			_node=n;
+
 		if (node==null)
 			_node=js.Lib.document.createElement("div");
+
+		//onMouseDown=new Signal<Void>();
 
 		_container=null;
 

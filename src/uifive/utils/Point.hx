@@ -5,8 +5,8 @@ package uifive.utils;
  */
 class Point {
 
-	public var x(default,null):Int;
-	public var y(default,null):Int;
+	public var x(default,default):Int;
+	public var y(default,default):Int;
 
 	/**
 	 * Construct.
@@ -21,5 +21,12 @@ class Point {
 	 */
 	public function add(p:Point):Point {
 		return new Point(x+p.x,y+p.y);
+	}
+
+	/**
+	 * Sub a point.
+	 */
+	public function sub(p:Point):Point {
+		return new Point(x-p.x,y-p.y);
 	}
 }
