@@ -69,6 +69,8 @@ class HScrollBar extends WidgetContainer {
 	private function setMax(v:Float):Float {
 		_max=v;
 
+		trace("max set to: "+_max);
+
 		updateThumbFromValues();
 
 		return _max;
