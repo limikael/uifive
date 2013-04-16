@@ -96,13 +96,15 @@ class DataContainer<ItemType> extends WidgetContainer {
 		_renderers=new Array<IItemRenderer<ItemType>>();
 
 		if (_itemRendererClass!=null || _itemRendererFunc!=null) {
-			for (data in _dataProvider) {
-				var renderer:IItemRenderer<ItemType>=createItemRenderer();
+			if (_dataProvider!=null) {
+				for (data in _dataProvider) {
+					var renderer:IItemRenderer<ItemType>=createItemRenderer();
 
-				renderer.setData(data);
-				_renderers.push(renderer);
+					renderer.setData(data);
+					_renderers.push(renderer);
 
-				addWidget(renderer);
+					addWidget(renderer);
+				}
 			}
 		}
 	}
