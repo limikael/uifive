@@ -32,6 +32,10 @@ class WidgetContainer extends Widget {
 	 * Add widget.
 	 */
 	public function addWidget(w:IWidget):Void {
+		var index:Int=ArrayTools.indexOf(_widgets,w);
+		if (index>=0)
+			return;
+
 		_widgets.push(w);
 		w.container=this;
 		_node.appendChild(w.node);
@@ -44,7 +48,7 @@ class WidgetContainer extends Widget {
 	 * Remove widget.
 	 */
 	public function removeWidget(w:IWidget):Void {
-		var index=ArrayTools.indexOf(_widgets,w);
+		var index:Int=ArrayTools.indexOf(_widgets,w);
 		if (index<0)
 			return;
 
