@@ -12,6 +12,8 @@ import uifive.signals.MouseEvent;
  */
 class RootContainer extends WidgetContainer {
 
+	public static var lastAttached:RootContainer;
+
 	public var onMouseDown(default,null):Signal<MouseEvent>;
 	public var onMouseMove(default,null):Signal<MouseEvent>;
 	public var onMouseUp(default,null):Signal<MouseEvent>;
@@ -58,6 +60,8 @@ class RootContainer extends WidgetContainer {
 	 * Attach to dom.
 	 */
 	public function attach(domId:String):Void {
+		lastAttached=this;
+
 		var parent:HtmlDom=Lib.document.getElementById(domId);
 
 		parent.appendChild(node);
