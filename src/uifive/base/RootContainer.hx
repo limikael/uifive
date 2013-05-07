@@ -64,6 +64,10 @@ class RootContainer extends WidgetContainer {
 
 		var parent:HtmlDom=Lib.document.getElementById(domId);
 
+		if (parent==null) {
+			trace("RootContaner.attach: The element doesn't exist!");
+		}
+
 		parent.appendChild(node);
 	}
 }

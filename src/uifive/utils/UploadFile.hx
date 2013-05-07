@@ -44,7 +44,7 @@ class UploadFile {
 	/**
 	 * Upload.
 	 */
-	public function upload(file:Dynamic):Void {
+	public function uploadFile(file:Dynamic):Void {
 		var url:String=_url;
 
 		if (_parameters.length!=0)
@@ -54,8 +54,6 @@ class UploadFile {
 		_request=new XMLHttpRequest();
 		_request.open("post",url,true);
 
-//		_request.setRequestHeader("Content-Type", "multipart/form-data");
-//		_request.setRequestHeader("Content-Type", "multipart/form-data; charset=utf-8; boundary=" + Std.string(Math.random()).substr(2));
 		_request.setRequestHeader("X-File-Name", file.name);
 		_request.setRequestHeader("X-File-Size", file.size);
 		_request.setRequestHeader("X-File-Type", file.type);
