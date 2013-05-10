@@ -43,7 +43,7 @@ class Label extends Widget {
 		if (_text==null)
 			_text="";
 
-		_node.innerHTML=_text;
+		_node.innerHTML=StringTools.replace(_text,"\n","<br/>");
 
 		return _text;
 	}
