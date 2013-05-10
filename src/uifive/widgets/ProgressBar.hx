@@ -71,6 +71,7 @@ class ProgressBar extends WidgetContainer {
 		trace("updateing progress bar, w: "+width+" setting width: "+setWidth);
 
 		_bar.width=setWidth;
+		_bar.updatePositionHack();
 	}
 
 	/**

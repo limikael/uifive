@@ -18,9 +18,11 @@ class Image extends Widget {
 	/**
 	 * Constructor.
 	 */
-	public function new(src:String=null) {
+	public function new(src:String=null, offsX:Int=0, offsY:Int=0) {
 		super();
 
+		_offsetX=offsX;
+		_offsetY=offsY;
 		setSrc(src);
 
 		updateNode();

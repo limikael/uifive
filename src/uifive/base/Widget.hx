@@ -229,6 +229,7 @@ class Widget implements IWidget {
 	 * Update style.
 	 */
 	private function updateStyle():Void {
+//		_node.style.position="fixed";
 		_node.style.position="absolute";
 		_node.style.overflow="hidden";
 
@@ -255,5 +256,32 @@ class Widget implements IWidget {
 	 * Notify layout.
 	 */
 	public function notifyLayout():Void {
+	}
+
+	/**
+	 * Set top left.
+	 */
+	public function setLeftTop(l:Int, t:Int):Widget {
+		top=t;
+		left=l;
+		return this;
+	}
+
+	/**
+	 * Set top left.
+	 */
+	public function setSize(w:Int, h:Int):Widget {
+		width=w;
+		height=h;
+		return this;
+	}
+
+	/**
+	 * Update position hack in Chrome.
+	 */
+	public function updatePositionHack():Void {
+		node.style.display='none';
+		node.offsetHeight;
+		node.style.display='block';
 	}
 }
