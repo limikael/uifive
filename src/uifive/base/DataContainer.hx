@@ -32,15 +32,13 @@ class DataContainer<ItemType> extends WidgetContainer {
 	 */
 	public function setDataProvider(value:ICollection<ItemType>):ICollection<ItemType> {
 		if (_dataProvider!=null) {
-			_dataProvider.onAdd.removeListener(onDataProviderAdd);
-			_dataProvider.onRemove.removeListener(onDataProviderRemove);
+			_dataProvider.onUpdate.removeListener(onDataProviderUpdate);
 		}
 
 		_dataProvider=value;
 
 		if (_dataProvider!=null) {
-			_dataProvider.onAdd.addListener(onDataProviderAdd);
-			_dataProvider.onRemove.addListener(onDataProviderRemove);
+			_dataProvider.onUpdate.addListener(onDataProviderUpdate);
 		}
 
 		updateAll();
@@ -73,14 +71,7 @@ class DataContainer<ItemType> extends WidgetContainer {
 	/**
 	 * Add.
 	 */
-	private function onDataProviderAdd():Void {
-		updateAll();
-	}
-
-	/**
-	 * Remove.
-	 */
-	private function onDataProviderRemove():Void {
+	private function onDataProviderUpdate():Void {
 		updateAll();
 	}
 

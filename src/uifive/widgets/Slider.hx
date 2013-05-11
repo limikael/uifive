@@ -43,6 +43,7 @@ class Slider extends WidgetContainer {
 	 * Mouse down.
 	 */
 	private function onMouseDown(e:Dynamic) {
+		e.stopPropagation();
 		_downX=e.pageX;
 		_downLeft=_knob.left;
 

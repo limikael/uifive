@@ -49,6 +49,7 @@ class Knob extends WidgetContainer {
 	private function onMouseDown(e:Event):Void {
 		trace("mousedown");
 
+		e.stopPropagation();
 		_lastY=untyped e.pageY;
 
 		var root:RootContainer=WidgetUtil.getRootContainer(this);

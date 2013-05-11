@@ -7,8 +7,7 @@ import uifive.signals.Signal;
  */
 class Collection<ItemType> implements ICollection<ItemType> {
 
-	public var onAdd(default,null):Signal<Void>;
-	public var onRemove(default,null):Signal<Void>;
+	public var onUpdate(default,null):Signal<Void>;
 
 	private var _items:Array<ItemType>;
 
@@ -16,8 +15,7 @@ class Collection<ItemType> implements ICollection<ItemType> {
 	 * Construct.
 	 */
 	public function new(src:Array<ItemType>=null) {
-		onAdd=new Signal<Void>();
-		onRemove=new Signal<Void>();
+		onUpdate=new Signal<Void>();
 
 		_items=new Array<ItemType>();
 
@@ -34,8 +32,7 @@ class Collection<ItemType> implements ICollection<ItemType> {
 			return;
 
 		_items.push(item);
-
-		onAdd.dispatch();
+		onUpdate.dispatch();
 	}
 
 	/**
@@ -45,8 +42,7 @@ class Collection<ItemType> implements ICollection<ItemType> {
 		var o=this.getItemAt(index);
 
 		_items.splice(index,1);
-
-		onRemove.dispatch();
+		onUpdate.dispatch();
 	}
 
 	/**

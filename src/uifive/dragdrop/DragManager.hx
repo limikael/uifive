@@ -9,12 +9,18 @@ import uifive.utils.Point;
 import uifive.signals.MouseEvent;
 import uifive.signals.Signal;
 import js.Dom;
+import js.Dom.HtmlDom;
 
 /**
  * Make something draggable.
  */
 class DragManager {
 
+	public static inline var VERTICAL:Int=1;
+	public static inline var HORIZONTAL:Int=2;
+	public static inline var BOTH:Int=3;
+
+	public var directions(null,setDirections):Int;
 	public var targetClass(null,setTargetClass):Class<IWidget>;
 	public var onDrop(default,null):Signal<DropEvent>;
 
@@ -24,16 +30,36 @@ class DragManager {
 	private var _cloneStartPosition:Point;
 	private var _mouseDownPosition:Point;
 	private var _targetClass:Class<IWidget>;
+	private var _directions:Int;
+	private var _dragClass:String=null;
+	private var _cloneAdded:Bool;
 
 	/**
 	 * Make something draggable.
 	 */
 	public function new(target:Widget) {
 		_target=target;
+		_directions=BOTH;
 
 		onDrop=new Signal<DropEvent>();
 
 		target.node.onmousedown=onMouseDown;
+	}
+
+	/**
+	 * Add drag class.
+	 */
+	public function addDragClass(s:String):Void {
+		_dragClass=s;
+	}
+
+	/**
+	 * Set directions.
+	 */
+	private function setDirections(v:Int):Int {
+		_directions=v;
+
+		return v;
 	}
 
 	/**
@@ -51,8 +77,18 @@ class DragManager {
 	private function onMouseDown(e:Dynamic):Void {
 		_root=WidgetUtil.getRootContainer(_target);
 
-		_clone=new Widget(_target.node.cloneNode(true));
-		_root.addWidget(_clone);
+		var n:HtmlDom=_target.node.cloneNode(true);
+
+		_clone=new Widget(n);
+
+		if (_dragClass!=null)
+			_clone.addClass(_dragClass);
+
+		_clone.width=_target.node.offsetWidth;
+		_clone.height=_target.node.offsetHeight;
+		_cloneAdded=false;
+
+		//_root.addWidget(_clone);
 
 		_mouseDownPosition=new Point(e.pageX,e.pageY);
 		_cloneStartPosition=WidgetUtil.getGlobalPosition(_target);
@@ -72,11 +108,18 @@ class DragManager {
 	 * Move.
 	 */
 	private function onRootMouseMove(e:MouseEvent):Void {
+		if (!_cloneAdded) {
+			_root.addWidget(_clone);
+			_cloneAdded=true;
+		}
+
 		var delta:Point=new Point(e.x-_mouseDownPosition.x,e.y-_mouseDownPosition.y);
 
-		_clone.left=_cloneStartPosition.x+delta.x;
-		_clone.top=_cloneStartPosition.y+delta.y;
-		//trace("move..");
+		if (_directions&HORIZONTAL!=0)
+			_clone.left=_cloneStartPosition.x+delta.x;
+
+		if (_directions&VERTICAL!=0)
+			_clone.top=_cloneStartPosition.y+delta.y;
 	}
 
 	/**
@@ -87,6 +130,9 @@ class DragManager {
 		_root.onMouseUp.removeListener(onRootMouseUp);
 		_root.removeWidget(_clone);
 
+		if (!_cloneAdded)
+			return;
+
 		findTarget(_root,e.x,e.y);
 	}
 
@@ -94,13 +140,6 @@ class DragManager {
 	 * Find target.
 	 */
 	private function findTarget(w:Widget, x:Int, y:Int):Void {
-/*		var cn:String=Type.getClassName(Type.getClass(w));
-
-		if (cn.indexOf("TrackItemRenderer")>0) {
-			trace("awfawfawefwef "+w.node.offsetWidth+" "+w.node.offsetHeight);
-			trace("hit: "+WidgetUtil.hitTest(w,x,y));
-		}*/
-
 		if (WidgetUtil.hitTest(w,x,y)) {
 			if (Std.is(w,_targetClass)) {
 				var p:Point=WidgetUtil.getGlobalPosition(w);
