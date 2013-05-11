@@ -10,6 +10,7 @@ import js.Dom.FormElement;
  */
 class TextField extends Widget {
 
+	public var formNode(getFormNode,null):FormElement;
 	public var onChange(default,null):Signal<Void>;
 
 	public var enabled(getEnabled,setEnabled):Bool;
@@ -36,6 +37,13 @@ class TextField extends Widget {
 		_formNode.onkeyup=function(e) {
 			onChange.dispatch();
 		}
+	}
+
+	/**
+	 * Get form node.
+	 */
+	private function getFormNode():FormElement {
+		return _formNode;
 	}
 
 	/**
