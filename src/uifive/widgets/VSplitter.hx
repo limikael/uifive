@@ -25,13 +25,15 @@ class VSplitter extends WidgetContainer {
 
 	private var _downSplitterPos:Int;
 	private var _downMousePos:Int;
+	private var _splitterWidth:Int;
 
 	/**
 	 * Contruct.
 	 */
-	public function new() {
+	public function new(splitterWidth:Int=10) {
 		super();
 
+		_splitterWidth=splitterWidth;
 		_leftContainer=new WidgetContainer();
 		_leftContainer.left=0;
 		_leftContainer.top=0;
@@ -49,11 +51,11 @@ class VSplitter extends WidgetContainer {
 		_splitter=new Widget();
 		_splitter.top=0;
 		_splitter.bottom=0;
-		_splitter.width=10;
+		_splitter.width=splitterWidth;
 		_splitter.left=100;
 		_splitter.node.onmousedown=onSplitterMouseDown;
 
-		_splitter.node.style.backgroundColor="#808080";
+		//_splitter.node.style.backgroundColor="#808080";
 		_splitter.node.style.cursor="e-resize";
 		addWidget(_splitter);
 
@@ -89,11 +91,21 @@ class VSplitter extends WidgetContainer {
 	}
 
 	/**
+	 * Notify layout.
+	 */
+	override public function notifyLayout():Void {
+		if (_splitter.left>node.offsetWidth-50)
+			_splitter.left=node.offsetWidth-50;
+
+		updateSizes();
+	}
+
+	/**
 	 * Update sizes.
 	 */
 	private function updateSizes() {
 		_leftContainer.width=_splitter.left;
-		_rightContainer.width=node.offsetWidth-_splitter.left-10;
+		_rightContainer.width=node.offsetWidth-_splitter.left-_splitterWidth;
 
 		_leftContainer.notifyLayout();
 		_rightContainer.notifyLayout();

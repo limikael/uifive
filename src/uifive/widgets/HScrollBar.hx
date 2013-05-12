@@ -30,7 +30,7 @@ class HScrollBar extends WidgetContainer {
 	/**
 	 * Construct.
 	 */
-	public function new() {
+	public function new(thumbWidget:Widget=null) {
 		super();
 
 		_min=0;
@@ -38,7 +38,10 @@ class HScrollBar extends WidgetContainer {
 		_pageSize=1;
 		_value=0;
 
-		_thumb=new Widget();
+		if (thumbWidget==null)
+			thumbWidget=new Widget();
+
+		_thumb=thumbWidget;
 		addWidget(_thumb);
 
 		updateThumbFromValues();

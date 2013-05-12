@@ -57,10 +57,19 @@ class RootContainer extends WidgetContainer {
 	}
 
 	/**
+	 * Notify layout.
+	 */
+	private function onWindowResize(e:Event):Void {
+		notifyLayout();
+	}
+
+	/**
 	 * Attach to dom.
 	 */
 	public function attach(domId:String):Void {
 		lastAttached=this;
+
+		Lib.window.onresize=onWindowResize;
 
 		var parent:HtmlDom=Lib.document.getElementById(domId);
 
