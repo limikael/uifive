@@ -10,6 +10,7 @@ interface IWidget {
 
 	public var node(getNode,null):HtmlDom;
 	public var container(null,setContainer):WidgetContainer;
+	public var attached(getAttached,null):Bool;
 
 	public var width(getWidth,setWidth):Int;
 	public var height(getHeight,setHeight):Int;

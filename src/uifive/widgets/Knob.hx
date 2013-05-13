@@ -92,7 +92,7 @@ class Knob extends WidgetContainer {
 	 * Update rotation.
 	 */
 	private function updateRotation():Void {
-		trace("val: "+_value);
+		//trace("val: "+_value);
 		var deg:Int=Math.round(-135+_value*270);
 
 		untyped node.style.WebkitTransform="rotate("+deg+"deg)";

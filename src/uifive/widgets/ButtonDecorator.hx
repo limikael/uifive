@@ -34,7 +34,7 @@ class ButtonDecorator extends Widget {
 		_width=ow;
 		_height=oh;
 
-		updateStyle();
+		//updateStyle();
 
 		_node.onmouseover=onMouseOver;
 		_node.onmouseout=onMouseOut;

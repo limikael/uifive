@@ -18,6 +18,7 @@ class Widget implements IWidget {
 	public var bottom(getBottom,setBottom):Int;
 	public var container(getContainer,setContainer):WidgetContainer;
 	public var node(getNode,null):HtmlDom;
+	public var attached(getAttached,null):Bool;
 
 	private var _node:HtmlDom;
 	private var _container:WidgetContainer;
@@ -39,8 +40,6 @@ class Widget implements IWidget {
 		if (node==null)
 			_node=js.Lib.document.createElement("div");
 
-		//onMouseDown=new Signal<Void>();
-
 		_container=null;
 
 		_left=null;
@@ -49,7 +48,7 @@ class Widget implements IWidget {
 		_bottom=null;
 		_width=100;
 		_height=20;
-		updateStyle();
+//		updateStyle();
 	}
 
 	/**
@@ -68,7 +67,11 @@ class Widget implements IWidget {
 			return _left;
 
 		_left=value;
-		updateStyle();
+
+		if (attached)
+			notifyLayout();
+
+//		updateStyle();
 
 		return _left;
 	}
@@ -82,7 +85,11 @@ class Widget implements IWidget {
 			return _width;
 
 		_width=value;
-		updateStyle();
+
+		if (attached)
+			notifyLayout();
+
+//		updateStyle();
 
 		return _width;
 	}
@@ -96,7 +103,11 @@ class Widget implements IWidget {
 			return _right;
 
 		_right=value;
-		updateStyle();
+
+		if (attached)
+			notifyLayout();
+
+//		updateStyle();
 
 		return _right;
 	}
@@ -110,7 +121,11 @@ class Widget implements IWidget {
 			return _top;
 
 		_top=value;
-		updateStyle();
+
+		if (attached)
+			notifyLayout();
+
+//		updateStyle();
 
 		return _top;
 	}
@@ -124,7 +139,11 @@ class Widget implements IWidget {
 			return _height;
 
 		_height=value;
-		updateStyle();
+
+		if (attached)
+			notifyLayout();
+
+//		updateStyle();
 
 		return _height;
 	}
@@ -138,7 +157,11 @@ class Widget implements IWidget {
 			return _bottom;
 
 		_bottom=value;
-		updateStyle();
+
+		if (attached)
+			notifyLayout();
+
+//		updateStyle();
 
 		return _bottom;
 	}
@@ -217,19 +240,15 @@ class Widget implements IWidget {
 		var reg:EReg=new EReg("(?:^|\\s)"+className+"(?!\\S)","g");
 
 		_node.className=reg.replace(_node.className,"");
-
-/*		var cls=_node.className;
-
-		cls=cls.replace(,'');
-
-		cls=_node.className;*/
 	}
 
 	/**
 	 * Update style.
 	 */
 	private function updateStyle():Void {
-//		_node.style.position="fixed";
+		/*if (Type.getClassName(Type.getClass(this))=="uifive.widgets.Image")
+			trace("update style: "+Type.getClassName(Type.getClass(this)));*/
+
 		_node.style.position="absolute";
 		_node.style.overflow="hidden";
 
@@ -253,9 +272,20 @@ class Widget implements IWidget {
 	}	
 
 	/**
+	 * Attached?
+	 */
+	public function getAttached():Bool {
+		return _container!=null && _container.attached;
+	}
+
+	/**
 	 * Notify layout.
 	 */
 	public function notifyLayout():Void {
+		/*if (!attached)
+			throw "Notify layout called when unattached";*/
+
+		updateStyle();
 	}
 
 	/**

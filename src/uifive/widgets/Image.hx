@@ -68,6 +68,11 @@ class Image extends Widget {
 	 * Update node.
 	 */
 	private function updateNode():Void {
+//		trace("update node, src="+_src);
+
+/*		if (_src==null)
+			throw "no image..";*/
+
 		_node.style.backgroundImage="url('"+_src+"')";
 		_node.style.backgroundPosition="-"+_offsetX+"px -"+_offsetY+"px";
 	}

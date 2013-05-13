@@ -26,6 +26,7 @@ class VSplitter extends WidgetContainer {
 	private var _downSplitterPos:Int;
 	private var _downMousePos:Int;
 	private var _splitterWidth:Int;
+	private var _initialDone:Bool;
 
 	/**
 	 * Contruct.
@@ -59,7 +60,9 @@ class VSplitter extends WidgetContainer {
 		_splitter.node.style.cursor="e-resize";
 		addWidget(_splitter);
 
-		Timer.callLater(laterCheckSize);
+		_initialDone=false;
+
+//		Timer.callLater(laterCheckSize);
 	}
 
 	/**
@@ -67,14 +70,6 @@ class VSplitter extends WidgetContainer {
 	 */
 	public function addSplitterClass(cls:String):Void {
 		_splitter.addClass(cls);
-	}
-
-	/**
-	 * check size after creation.
-	 */
-	private function laterCheckSize() {
-		_splitter.left=Math.round(node.offsetWidth*.75);
-		updateSizes();
 	}
 
 	/**
@@ -94,10 +89,19 @@ class VSplitter extends WidgetContainer {
 	 * Notify layout.
 	 */
 	override public function notifyLayout():Void {
+		if (!_initialDone) {
+			_splitter.left=Math.round(node.offsetWidth*.75);
+			_initialDone=true;
+		}
+
+		//trace("## vsplitter offset width: "+node.offsetWidth);
+
 		if (_splitter.left>node.offsetWidth-50)
 			_splitter.left=node.offsetWidth-50;
 
 		updateSizes();
+
+		super.notifyLayout();
 	}
 
 	/**
@@ -107,10 +111,9 @@ class VSplitter extends WidgetContainer {
 		_leftContainer.width=_splitter.left;
 		_rightContainer.width=node.offsetWidth-_splitter.left-_splitterWidth;
 
-		_leftContainer.notifyLayout();
-		_rightContainer.notifyLayout();
-/*		_leftContainer.onResize.dispatch();
-		_rightContainer.onResize.dispatch();*/
+//		super.notifyLayout();
+/*		_leftContainer.notifyLayout();
+		_rightContainer.notifyLayout();*/
 	}
 
 	/**

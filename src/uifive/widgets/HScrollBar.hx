@@ -14,6 +14,7 @@ class HScrollBar extends WidgetContainer {
 
 	public var onChange(default,null):Signal<Void>;
 
+	public var enabled(null,setEnabled):Bool;
 	public var min(null,setMin):Float;
 	public var max(null,setMax):Float;
 	public var pageSize(null,setPageSize):Float;
@@ -46,13 +47,24 @@ class HScrollBar extends WidgetContainer {
 
 		updateThumbFromValues();
 
-		_thumb.top=0;
-		_thumb.bottom=0;
-
 		_thumb.node.onmousedown=onThumbMouseDown;
 		node.onmousedown=onTrackMouseDown;
 
 		onChange=new Signal<Void>();
+		initializeThumbLayout();
+	}
+
+	/**
+	 * Set enabled.
+	 */
+	private function setEnabled(v:Bool):Bool {
+		if (v)
+			addWidget(_thumb);
+
+		else
+			removeWidget(_thumb);
+
+		return v;
 	}
 
 	/**
@@ -72,7 +84,7 @@ class HScrollBar extends WidgetContainer {
 	private function setMax(v:Float):Float {
 		_max=v;
 
-		trace("max set to: "+_max);
+		//trace("max set to: "+_max);
 
 		updateThumbFromValues();
 
@@ -112,7 +124,7 @@ class HScrollBar extends WidgetContainer {
 	 * Track mouse down.
 	 */
 	private function onTrackMouseDown(e:Dynamic):Void {
-		var x:Float=e.pageX-node.offsetLeft;
+		/*var x:Float=e.pageX-node.offsetLeft;
 
 		trace("x: "+x+" l: "+_thumb.left);
 
@@ -125,39 +137,19 @@ class HScrollBar extends WidgetContainer {
 		clampValue();
 		updateThumbFromValues();
 
-		onChange.dispatch();
+		onChange.dispatch();*/
 	}
 
 	/**
 	 * Trace thumb mouse down.
 	 */
 	private function onThumbMouseDown(e:Dynamic):Void {
-		_downLeft=_thumb.left;
-		_downMouseX=e.pageX;
+		_downLeft=getThumbPosition();
+		_downMouseX=mapEventCoordinate(e);
 
 		var root:RootContainer=WidgetUtil.getRootContainer(this);
 		root.onMouseMove.addListener(onRootMouseMove);
 		root.onMouseUp.addListener(onRootMouseUp);
-	}
-
-	/**
-	 * Root mouse move.
-	 */
-	private function onRootMouseMove(e:MouseEvent):Void {
-		var delta:Float=e.x-_downMouseX;
-
-		_thumb.left=Math.round(_downLeft+delta);
-
-		if (_thumb.left<0)
-			_thumb.left=0;
-
-		if (_thumb.left>node.offsetWidth-_thumb.width)
-			_thumb.left=node.offsetWidth-_thumb.width;
-
-		_value=_min+(_max-_min)*_thumb.left/(node.offsetWidth-_thumb.width);
-		clampValue();
-
-		onChange.dispatch();
 	}
 
 	/**
@@ -188,23 +180,100 @@ class HScrollBar extends WidgetContainer {
 	}
 
 	/**
-	 * Update thumb from values.
-	 */
-	private function updateThumbFromValues():Void {
-		var w:Float=node.offsetWidth;
-
-		_thumb.width=Math.round(w*_pageSize/(_max-_min));
-
-		var percent:Float=(_value-_min)/(_max-_min);
-		_thumb.left=Math.round(percent*(w-_thumb.width));
-	}
-
-	/**
 	 * Notify layout.
 	 */
 	override public function notifyLayout():Void {
 		super.notifyLayout();
 
 		updateThumbFromValues();
+	}
+
+	/**
+	 * Update thumb from values.
+	 */
+	private function updateThumbFromValues():Void {
+		var w:Float=getAvailableTrackSize();
+
+		var percent:Float=(_value-_min)/(_max-_min);
+
+		setThumbPosition(Math.round(percent*(w-getThumbSize())));
+		setThumbSize(Math.round(w*_pageSize/(_max-_min)));
+	}
+
+	/**
+	 * Root mouse move.
+	 */
+	private function onRootMouseMove(e:MouseEvent):Void {
+		var delta:Float=mapEventCoordinate(e)-_downMouseX;
+
+		setThumbPosition(Math.round(_downLeft+delta));
+
+		if (getThumbPosition()<0)
+			setThumbPosition(0);
+
+		if (getThumbPosition()>getAvailableTrackSize()-getThumbSize())
+			setThumbPosition(getAvailableTrackSize()-getThumbSize());
+
+		_value=_min+(_max-_min)*getThumbPosition()/(getAvailableTrackSize()-getThumbSize());
+		clampValue();
+
+		onChange.dispatch();
+	}
+
+	/**
+	 * Init thumb layout.
+	 * This function and the ones below should be overridden for vertical.
+	 */
+	private function initializeThumbLayout():Void {
+		_thumb.top=0;
+		_thumb.bottom=0;
+	}
+
+	/**
+	 * Get extent of the track.
+	 */
+	private function getAvailableTrackSize():Int {
+		return node.offsetWidth;
+	}
+
+	/**
+	 * Getter.
+	 */
+	private function getThumbSize():Int {
+		return _thumb.width;
+	}
+
+	/**
+	 * Getter.
+	 */
+	private function getThumbPosition():Int {
+		return _thumb.left;
+	}
+
+	/**
+	 * Set thumb pos.
+	 */
+	private function setThumbPosition(pos:Int):Void {
+		_thumb.left=pos;
+	}
+
+	/**
+	 * Set thumb extent.
+	 */
+	private function setThumbSize(size:Int):Void {
+		_thumb.width=size;
+	}
+
+	/**
+	 * Map event coordinate.
+	 */
+	private function mapEventCoordinate(e:Dynamic):Int {
+		if (e.pageX!=null)
+			return e.pageX;
+
+		if (e.x!=null)
+			return e.x;
+
+		throw "strange mouse event";
 	}
 }

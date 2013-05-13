@@ -22,10 +22,6 @@ class WidgetContainer extends Widget {
 
 		_widgets=[];
 		_layout=null;
-
-		/*node.onresize=function(e) {
-			trace("resize...");
-		}*/
 	}
 
 	/**
@@ -42,6 +38,9 @@ class WidgetContainer extends Widget {
 
 		if (_layout!=null)
 			_layout.updateLayout();
+
+		if (w.attached)
+			w.notifyLayout();
 	}
 
 	/**

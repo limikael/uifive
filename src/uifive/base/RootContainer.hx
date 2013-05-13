@@ -57,6 +57,13 @@ class RootContainer extends WidgetContainer {
 	}
 
 	/**
+	 * Attached?
+	 */
+	override public function getAttached():Bool {
+		return true;
+	}
+
+	/**
 	 * Notify layout.
 	 */
 	private function onWindowResize(e:Event):Void {
