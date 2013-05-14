@@ -314,4 +314,22 @@ class Widget implements IWidget {
 		node.offsetHeight;
 		node.style.display='block';
 	}
+
+	/**
+	 * Add event listener.
+	 */
+	public function addEventListener(type:String, listener:Dynamic->Void):Void {
+		var n:Dynamic=cast _node;
+
+		n.addEventListener(type,listener);
+	}
+
+	/**
+	 * Remove event listener.
+	 */
+	public function removeEventListener(type:String, listener:Dynamic->Void):Void {
+		var n:Dynamic=cast _node;
+
+		n.removeEventListener(type,listener);
+	}
 }

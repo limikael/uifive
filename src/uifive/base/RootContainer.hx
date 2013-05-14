@@ -86,4 +86,21 @@ class RootContainer extends WidgetContainer {
 
 		parent.appendChild(node);
 	}
+
+	/**
+	 * Attach to body.
+	 */
+	public function attachToBody():Void {
+		lastAttached=this;
+
+		Lib.window.onresize=onWindowResize;
+
+		var parent:HtmlDom=Lib.document.body;
+
+		if (parent==null) {
+			trace("RootContaner.attach: The element doesn't exist!");
+		}
+
+		parent.appendChild(node);
+	}
 }
