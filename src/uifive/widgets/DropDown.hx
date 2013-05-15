@@ -18,6 +18,7 @@ class DropDown<ItemType> extends Widget {
 
 	public var dataProvider(null,setDataProvider):Collection<ItemType>;
 	public var selectedIndex(getSelectedIndex,setSelectedIndex):Int;
+	public var selectedItem(getSelectedItem,setSelectedItem):ItemType;
 
 	private var _dataProvider:Collection<ItemType>;
 	private var _selectNode:Select;
@@ -91,5 +92,23 @@ class DropDown<ItemType> extends Widget {
 		_selectNode.selectedIndex=v;
 
 		return _selectNode.selectedIndex;
+	}
+
+	/**
+	 * Set selected item.
+	 */
+	public function setSelectedItem(s:ItemType):ItemType {
+		for (i in 0..._dataProvider.getLength())
+			if (_dataProvider.getItemAt(i)==s)
+				setSelectedIndex(i);
+
+		return getSelectedItem();
+	}
+
+	/**
+	 * Set selected item.
+	 */
+	private function getSelectedItem():ItemType {
+		return _dataProvider.getItemAt(_selectNode.selectedIndex);
 	}
 }
