@@ -86,4 +86,13 @@ class Collection<ItemType> implements ICollection<ItemType> {
 	public function iterator():Iterator<ItemType> {
 		return _items.iterator();
 	}
+
+	/**
+	 * Set items.
+	 */
+	public function setItems(a:Array<ItemType>):Void {
+		_items=a.copy();
+
+		onUpdate.dispatch();
+	}
 }
