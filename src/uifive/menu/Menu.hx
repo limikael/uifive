@@ -3,6 +3,10 @@ package uifive.menu;
 import uifive.base.WidgetContainer;
 import uifive.layout.VerticalLayout;
 import uifive.signals.Signal;
+import uifive.base.Stage;
+import uifive.base.WidgetEvent;
+import uifive.utils.Point;
+import uifive.utils.WidgetUtil;
 
 /**
  * Menu.
@@ -85,5 +89,31 @@ class Menu extends WidgetContainer {
 				return item;
 
 		return null;
+	}
+
+	/**
+	 * Show popup.
+	 */
+	public function showPopup(pageX:Int, pageY:Int):Void {
+		top=pageY;
+
+		if (pageX>Stage.root.node.offsetWidth-width)
+			left=pageX-width;
+
+		else
+			left=pageX;
+
+		Stage.root.addWidget(this);
+		Stage.root.addEventListener(WidgetEvent.MOUSE_DOWN,onStageMouseDown);
+	}
+
+	/**
+	 * Stage mouse down.
+	 */
+	private function onStageMouseDown(e:Dynamic):Void {
+		var p:Point=WidgetUtil.getGlobalPosition(this);
+
+		if (e.pageX<p.x || e.pageY<p.y || e.pageX>p.x+width || e.pageY>p.y+height)
+			Stage.root.removeWidget(this);
 	}
 }

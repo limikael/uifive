@@ -10,5 +10,6 @@ class WidgetEvent {
 	public static inline var MOUSE_OUT:String="mouseout";
 	public static inline var FOCUS:String="focus";
 	public static inline var BLUR:String="blur";
+	public static inline var CLICK:String="click";
 
 }
