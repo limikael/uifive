@@ -18,11 +18,16 @@ class HSlider extends WidgetContainer {
 
 	public var onChange(default,null):Signal<Void>;
 	public var onChangeEnd(default,null):Signal<Void>;
+	public var max(null,setMax):Float;
+	public var min(null,setMin):Float;
+
 	public var value(getValue,setValue):Float;
 
 	private var _knob:Widget;
 	private var _downMouse:Int;
 	private var _downWidget:Int;
+	private var _min:Float;
+	private var _max:Float;
 
 	/**
 	 * Construct.
@@ -36,10 +41,31 @@ class HSlider extends WidgetContainer {
 		if (t!=null)
 			addWidget(t);
 
+		_min=0;
+		_max=1;
+
 		_knob=k;
 		addWidget(_knob);
 
 		_knob.addEventListener(WidgetEvent.MOUSE_DOWN,onMouseDown);
+	}
+
+	/**
+	 * Set max.
+	 */
+	private function setMax(v:Float):Float {
+		_max=v;
+
+		return _max;
+	}
+
+	/**
+	 * Set max.
+	 */
+	private function setMin(v:Float):Float {
+		_min=v;
+
+		return _min;
 	}
 
 	/**
@@ -86,14 +112,18 @@ class HSlider extends WidgetContainer {
 	 * Get value.
 	 */
 	private function getValue():Float {
-		return getKnobPosition()/(getAvailableTrackSize()-getKnobSize());
+		var frac:Float=getKnobPosition()/(getAvailableTrackSize()-getKnobSize());
+
+		return _min+frac*(_max-_min);
 	}
 
 	/**
 	 * Set value.
 	 */
 	private function setValue(v:Float):Float {
-		setKnobPosition(Math.round(v*(getAvailableTrackSize()-getKnobSize())));
+		var frac:Float=(v-_min)/(_max-_min);
+
+		setKnobPosition(Math.round(frac*(getAvailableTrackSize()-getKnobSize())));
 		_knob.updatePositionHack();
 
 		return v;

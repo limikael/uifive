@@ -16,12 +16,15 @@ class Knob extends WidgetContainer {
 
 	public var onChange(default,null):Signal<Void>;
 	public var onChangeEnd(default,null):Signal<Void>;
-
+	public var max(null,setMax):Float;
+	public var min(null,setMin):Float;
 	public var value(getValue,setValue):Float;
 
 	private var _knob:Widget;
 	private var _value:Float;
 	private var _lastY:Int;
+	private var _min:Float;
+	private var _max:Float;
 
 	/**
 	 * Construct.
@@ -40,6 +43,9 @@ class Knob extends WidgetContainer {
 		node.onmousedown=onMouseDown;
 
 		_value=0;
+		_min=0;
+		_max=1;
+
 		updateRotation();
 	}
 
@@ -62,13 +68,13 @@ class Knob extends WidgetContainer {
 	 */
 	private function onMouseMove(e:MouseEvent):Void {
 		var delta:Float=e.y-_lastY;
-		_value-=delta/200;
+		_value-=(delta*(_max-_min))/200;
 
-		if (_value<0)
-			_value=0;
+		if (_value<_min)
+			_value=_min;
 
-		if (_value>1)
-			_value=1;
+		if (_value>_max)
+			_value=_max;
 
 		updateRotation();
 
@@ -93,7 +99,9 @@ class Knob extends WidgetContainer {
 	 */
 	private function updateRotation():Void {
 		//trace("val: "+_value);
-		var deg:Int=Math.round(-135+_value*270);
+		var frac:Float=(_value-_min)/(_max-_min);
+
+		var deg:Int=Math.round(-135+frac*270);
 
 		untyped node.style.WebkitTransform="rotate("+deg+"deg)";
 		untyped node.style.transform="rotate("+deg+"deg)";
@@ -112,8 +120,36 @@ class Knob extends WidgetContainer {
 	private function setValue(v:Float):Float {
 		_value=v;
 
+		if (_value>_max)
+			_value=max;
+
+		if (_value<_min)
+			value=min;
+
 		updateRotation();
 
 		return _value;
+	}
+
+	/**
+	 * Set max.
+	 */
+	private function setMax(v:Float):Float {
+		_max=v;
+
+		updateRotation();
+
+		return _max;
+	}
+
+	/**
+	 * Set max.
+	 */
+	private function setMin(v:Float):Float {
+		_min=v;
+
+		updateRotation();
+
+		return _min;
 	}
 }
