@@ -2,6 +2,7 @@ package uifive.base;
 
 import js.Dom.HtmlDom;
 import js.Dom;
+import uifive.utils.ArrayTools;
 
 /** 
  * Base class.
@@ -30,10 +31,14 @@ class Widget implements IWidget {
 	private var _width:Null<Int>;
 	private var _height:Null<Int>;
 
+	private var _eventTranslators:Array<WidgetEventTranslator>;
+
 	/**
 	 * Construct.
 	 */
 	public function new(n:HtmlDom=null) {
+		_eventTranslators=new Array<WidgetEventTranslator>();
+
 		if (n!=null)
 			_node=n;
 
@@ -319,17 +324,23 @@ class Widget implements IWidget {
 	 * Add event listener.
 	 */
 	public function addEventListener(type:String, listener:Dynamic->Void):Void {
-		var n:Dynamic=cast _node;
+		removeEventListener(type,listener);
 
-		n.addEventListener(type,listener);
+		var e:WidgetEventTranslator=new WidgetEventTranslator(type,listener);
+		_eventTranslators.push(e);
+
+		untyped _node.addEventListener(type,e.untypedFunction);
 	}
 
 	/**
 	 * Remove event listener.
 	 */
 	public function removeEventListener(type:String, listener:Dynamic->Void):Void {
-		var n:Dynamic=cast _node;
+		for (t in _eventTranslators.copy())
+			if (t.eventType==type && Reflect.compareMethods(listener,t.haxeFunction)) {
+				untyped _node.removeEventListener(t.eventType,t.untypedFunction);
 
-		n.removeEventListener(type,listener);
+				_eventTranslators.splice(ArrayTools.indexOf(_eventTranslators,t),1);
+			}
 	}
 }
