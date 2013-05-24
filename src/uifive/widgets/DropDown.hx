@@ -2,7 +2,7 @@ package uifive.widgets;
 
 import uifive.base.Widget;
 import uifive.signals.Signal;
-import uifive.collections.Collection;
+import uifive.collections.ICollection;
 
 import js.Dom.HtmlDom;
 import js.Dom.Select;
@@ -16,11 +16,12 @@ class DropDown<ItemType> extends Widget {
 
 	public var onChange(default,null):Signal<Void>;
 
-	public var dataProvider(null,setDataProvider):Collection<ItemType>;
+	public var labelFunc(null,setLabelFunc):ItemType->String;
+	public var dataProvider(null,setDataProvider):ICollection<ItemType>;
 	public var selectedIndex(getSelectedIndex,setSelectedIndex):Int;
 	public var selectedItem(getSelectedItem,setSelectedItem):ItemType;
 
-	private var _dataProvider:Collection<ItemType>;
+	private var _dataProvider:ICollection<ItemType>;
 	private var _selectNode:Select;
 	private var _labelFunc:ItemType->String;
 
@@ -36,6 +37,15 @@ class DropDown<ItemType> extends Widget {
 		_labelFunc=defaultLabelFunc;
 
 		super();
+	}
+
+	/**
+	 * Set label func.
+	 */
+	private function setLabelFunc(f:ItemType->String):ItemType->String {
+		_labelFunc=f;
+
+		return _labelFunc;
 	}
 
 	/**
@@ -55,7 +65,7 @@ class DropDown<ItemType> extends Widget {
 	/**
 	 * Set data provider.
 	 */
-	private function setDataProvider(p:Collection<ItemType>):Collection<ItemType> {
+	private function setDataProvider(p:ICollection<ItemType>):ICollection<ItemType> {
 		_dataProvider=p;
 
 		updateAll();
