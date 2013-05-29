@@ -10,10 +10,12 @@ class Image extends Widget {
 	public var offsetX(null,setOffsetX):Int;
 	public var offsetY(null,setOffsetY):Int;
 	public var src(null,setSrc):String;
+	public var repeat(null,setRepeat):Bool;
 
 	private var _offsetX:Int=0;
 	private var _offsetY:Int=0;
 	private var _src:String="";
+	private var _repeat:Bool;
 
 	/**
 	 * Constructor.
@@ -23,6 +25,7 @@ class Image extends Widget {
 
 		_offsetX=offsX;
 		_offsetY=offsY;
+		_repeat=true;
 		setSrc(src);
 
 		updateNode();
@@ -65,6 +68,17 @@ class Image extends Widget {
 	}
 
 	/**
+	 * Set repeat.
+	 */
+	private function setRepeat(v:Bool):Bool {
+		_repeat=v;
+
+		updateNode();
+
+		return v;
+	}
+
+	/**
 	 * Update node.
 	 */
 	private function updateNode():Void {
@@ -75,5 +89,6 @@ class Image extends Widget {
 
 		_node.style.backgroundImage="url('"+_src+"')";
 		_node.style.backgroundPosition="-"+_offsetX+"px -"+_offsetY+"px";
+		_node.style.backgroundRepeat=_repeat?"repeat":"no-repeat";
 	}
 }
